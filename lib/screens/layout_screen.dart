@@ -336,15 +336,11 @@ class _LayoutScreenState extends State<LayoutScreen> {
               ],
             ),
           if (!isWide) const Spacer(),
-          isWide
-              ? Text(
-                  _viewLabel,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
-                )
-              : Text(
-                  _viewLabel,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
-                ),
+          if (isWide)
+            Text(
+              _viewLabel,
+              style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
+            ),
           const Spacer(),
           if (isWide)
             Container(

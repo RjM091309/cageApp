@@ -47,16 +47,29 @@ class _MonthlyViewState extends State<MonthlyView> {
         const SizedBox(height: 16),
         LayoutBuilder(
           builder: (context, constraints) {
-            return GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: constraints.maxWidth > 700 ? 3 : 1,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: constraints.maxWidth > 700 ? 1.9 : 1.0,
+            final isWide = constraints.maxWidth > 700;
+            if (isWide) {
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.9,
+                children: [
+                  _metricCard('Top Monthly Commission', 'Rank #1 - Agent Dragon', _fmt.format(850000), Icons.star, amberAccent),
+                  _metricCard('Accumulated Expenses', 'MTD Expenditure', _fmt.format(420000), Icons.verified_user, roseAccent),
+                  _metricCard('Games (Rolling)', 'Total Rolling', _fmt.format(125000000), Icons.sports_esports, cyanAccent),
+                ],
+              );
+            }
+            return Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 _metricCard('Top Monthly Commission', 'Rank #1 - Agent Dragon', _fmt.format(850000), Icons.star, amberAccent),
+                const SizedBox(height: 12),
                 _metricCard('Accumulated Expenses', 'MTD Expenditure', _fmt.format(420000), Icons.verified_user, roseAccent),
+                const SizedBox(height: 12),
                 _metricCard('Games (Rolling)', 'Total Rolling', _fmt.format(125000000), Icons.sports_esports, cyanAccent),
               ],
             );
@@ -183,29 +196,46 @@ class _MonthlyViewState extends State<MonthlyView> {
 
   Widget _metricCard(String title, String sub, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 21),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderColor),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white), overflow: TextOverflow.ellipsis),
-              ),
-            ],
+          Icon(icon, size: 24, color: color),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  sub,
+                  style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(sub, style: TextStyle(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold)),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
         ],
       ),
     );
