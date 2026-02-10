@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../generated/app_localizations.dart';
 import '../constants/mock_data.dart';
 import '../theme/app_theme.dart';
 
@@ -226,6 +227,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -241,10 +243,10 @@ class _DailySettlementViewState extends State<DailySettlementView> {
               crossAxisSpacing: 16,
               childAspectRatio: 1.85,
               children: [
-                _metricTile('Total Buy-In', '₱24.5M'),
-                _metricTile('Avg Rolling', '₱10.2M'),
-                _metricTile('Win Rate', '+14.2%', isGreen: true),
-                _metricTile('Total Games', '174'),
+                _metricTile(l10n.totalBuyIn, '₱24.5M'),
+                _metricTile(l10n.avgRolling, '₱10.2M'),
+                _metricTile(l10n.winRate, '+14.2%', isGreen: true),
+                _metricTile(l10n.totalGames, '174'),
               ],
             );
           },
@@ -344,7 +346,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             children: [
               Icon(Icons.grid_view, size: isCompact ? 16 : 20, color: Colors.blue[300]),
               SizedBox(width: isCompact ? 6 : 8),
-              Text('Number of Games & Win/Loss', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
+              Text(AppLocalizations.of(context).numberOfGamesWinLoss, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
             ],
           ),
           SizedBox(height: isCompact ? 12 : 16),
@@ -407,7 +409,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             children: [
               Icon(Icons.trending_up, size: isCompact ? 16 : 18, color: emeraldAccent),
               SizedBox(width: isCompact ? 6 : 8),
-              Text('Win / Loss Trend', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
+              Text(AppLocalizations.of(context).winLossTrend, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
             ],
           ),
           SizedBox(height: isCompact ? 12 : 16),
@@ -487,7 +489,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             children: [
               Icon(Icons.handshake, size: isCompact ? 16 : 18, color: amberAccent),
               SizedBox(width: isCompact ? 6 : 8),
-              Text('Daily Commission', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
+              Text(AppLocalizations.of(context).dailyCommission, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
             ],
           ),
           SizedBox(height: isCompact ? 12 : 16),
@@ -538,7 +540,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
             children: [
               Icon(Icons.receipt_long, size: isCompact ? 16 : 18, color: roseAccent),
               SizedBox(width: isCompact ? 6 : 8),
-              Text('Junket Expenses', style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
+              Text(AppLocalizations.of(context).junketExpenses, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
             ],
           ),
           SizedBox(height: isCompact ? 12 : 16),

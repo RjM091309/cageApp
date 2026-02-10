@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../generated/app_localizations.dart';
 import '../widgets/stat_card.dart';
 import '../constants/mock_data.dart';
 import '../theme/app_theme.dart';
@@ -18,6 +19,7 @@ class RealTimeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -36,7 +38,7 @@ class RealTimeView extends StatelessWidget {
               childAspectRatio: aspectRatio,
               children: [
                 StatCard(
-                  label: 'Total Chips',
+                  label: l10n.totalChips,
                   value: _fmt.format(12500000),
                   icon: Icons.monetization_on,
                   color: StatCardColor.cyan,
@@ -44,25 +46,25 @@ class RealTimeView extends StatelessWidget {
                   trendIsUp: true,
                 ),
                 StatCard(
-                  label: 'Cash Balance',
+                  label: l10n.cashBalance,
                   value: _fmt.format(4820000),
                   icon: Icons.payments,
                   color: StatCardColor.emerald,
                 ),
                 StatCard(
-                  label: 'Guest Balance',
+                  label: l10n.guestBalance,
                   value: _fmt.format(2150000),
                   icon: Icons.people,
                   color: StatCardColor.blue,
                 ),
                 StatCard(
-                  label: 'Net Junket Money',
+                  label: l10n.netJunketMoney,
                   value: _fmt.format(8900000),
                   icon: Icons.account_balance,
                   color: StatCardColor.amber,
                 ),
                 StatCard(
-                  label: 'Net Junket Cash',
+                  label: l10n.netJunketCash,
                   value: _fmt.format(3150000),
                   icon: Icons.account_balance_wallet,
                   color: StatCardColor.rose,
@@ -90,13 +92,13 @@ class RealTimeView extends StatelessWidget {
                       children: [
                         Icon(Icons.show_chart, size: 18, color: cyanAccent),
                         const SizedBox(width: 8),
-                        const Text('Ongoing Games', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+                        Text(l10n.ongoingGames, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
                       ],
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(color: cyanAccent.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-                      child: Text('LIVE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: cyanAccent)),
+                      child: Text(l10n.live, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: cyanAccent)),
                     ),
                   ],
                 ),
@@ -117,13 +119,15 @@ class RealTimeView extends StatelessWidget {
                       TableRow(
                         decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05)),
                         children: [
-                          _tableCell(Text('Account', style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                          _tableCell(Text('Table', style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                          _tableCell(Text('Buy-In', style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                          _tableCell(Text('Status', style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
+                          _tableCell(Text(l10n.account, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
+                          _tableCell(Text(l10n.table, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
+                          _tableCell(Text(l10n.buyIn, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
+                          _tableCell(Text(l10n.status, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
                         ],
                       ),
-                      ...mockOngoingGames.map((g) => TableRow(
+                      ...mockOngoingGames.map((g) {
+                        final statusLabel = g.status == 'Active' ? l10n.statusActive : l10n.statusSettling;
+                        return TableRow(
                         children: [
                           _tableCell(Text(g.account, style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500))),
                           _tableCell(Text(g.table, style: TextStyle(fontSize: 13, color: Colors.grey[400]))),
@@ -140,14 +144,14 @@ class RealTimeView extends StatelessWidget {
                                       color: g.status == 'Active' ? emeraldAccent.withValues(alpha: 0.2) : amberAccent.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: Text(g.status, style: TextStyle(fontSize: 10, color: g.status == 'Active' ? emeraldAccent : amberAccent, fontWeight: FontWeight.bold)),
+                                    child: Text(statusLabel, style: TextStyle(fontSize: 10, color: g.status == 'Active' ? emeraldAccent : amberAccent, fontWeight: FontWeight.bold)),
                                   ),
                                 ],
                               ),
                             ),
                           ),
                         ],
-                      )),
+                      ); }),
                     ],
                   );
                   if (isMobile) {

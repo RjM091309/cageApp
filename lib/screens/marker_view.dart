@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../generated/app_localizations.dart';
 import '../constants/mock_data.dart';
 import '../theme/app_theme.dart';
 
@@ -17,7 +18,7 @@ class MarkerView extends StatelessWidget {
           children: [
             Icon(Icons.description, color: cyanAccent, size: 20),
             const SizedBox(width: 8),
-            const Text('Real-Time Marker', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text(AppLocalizations.of(context).realTimeMarker, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
         const SizedBox(height: 24),
@@ -83,14 +84,14 @@ class MarkerView extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('ACTIVE BALANCE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500])),
+                              Text(AppLocalizations.of(context).activeBalance, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500])),
                               Text(_fmt.format(marker.balance), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text('LIMIT', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500])),
+                              Text(AppLocalizations.of(context).limit, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500])),
                               Text(_fmt.format(marker.limit), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[300])),
                             ],
                           ),
@@ -100,7 +101,7 @@ class MarkerView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('UTILIZATION', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500])),
+                          Text(AppLocalizations.of(context).utilization, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500])),
                           Text('${usagePercent.toStringAsFixed(1)}%', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: usagePercent > 80 ? roseAccent : cyanAccent)),
                         ],
                       ),

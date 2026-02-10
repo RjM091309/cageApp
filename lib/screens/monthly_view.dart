@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../generated/app_localizations.dart';
 import '../widgets/stat_card.dart';
 import '../theme/app_theme.dart';
 
@@ -31,17 +32,29 @@ class _MonthlyViewState extends State<MonthlyView> {
     });
   }
 
+  String _monthLabel(BuildContext context, String key) {
+    final l10n = AppLocalizations.of(context);
+    switch (key) {
+      case 'January': return l10n.monthJanuary;
+      case 'February': return l10n.monthFebruary;
+      case 'March': return l10n.monthMarch;
+      case 'April': return l10n.monthApril;
+      default: return key;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         StatCard(
-          label: 'Monthly Accumulated Win Loss',
+          label: l10n.monthlyAccumulatedWinLoss,
           value: _fmt.format(42800000),
           icon: Icons.gps_fixed,
           color: StatCardColor.emerald,
-          trendValue: '18% vs Last Month',
+          trendValue: l10n.trendVsLastMonth('18'),
           trendIsUp: true,
         ),
         const SizedBox(height: 16),
@@ -57,20 +70,20 @@ class _MonthlyViewState extends State<MonthlyView> {
                 crossAxisSpacing: 12,
                 childAspectRatio: 1.9,
                 children: [
-                  _metricCard('Top Monthly Commission', 'Rank #1 - Agent Dragon', _fmt.format(850000), Icons.star, amberAccent),
-                  _metricCard('Accumulated Expenses', 'MTD Expenditure', _fmt.format(420000), Icons.verified_user, roseAccent),
-                  _metricCard('Games (Rolling)', 'Total Rolling', _fmt.format(125000000), Icons.sports_esports, cyanAccent),
+                  _metricCard(l10n.topMonthlyCommission, l10n.rankAgentDragon, _fmt.format(850000), Icons.star, amberAccent),
+                  _metricCard(l10n.accumulatedExpenses, l10n.mtdExpenditure, _fmt.format(420000), Icons.verified_user, roseAccent),
+                  _metricCard(l10n.gamesRolling, l10n.totalRolling, _fmt.format(125000000), Icons.sports_esports, cyanAccent),
                 ],
               );
             }
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _metricCard('Top Monthly Commission', 'Rank #1 - Agent Dragon', _fmt.format(850000), Icons.star, amberAccent),
+                _metricCard(l10n.topMonthlyCommission, l10n.rankAgentDragon, _fmt.format(850000), Icons.star, amberAccent),
                 const SizedBox(height: 12),
-                _metricCard('Accumulated Expenses', 'MTD Expenditure', _fmt.format(420000), Icons.verified_user, roseAccent),
+                _metricCard(l10n.accumulatedExpenses, l10n.mtdExpenditure, _fmt.format(420000), Icons.verified_user, roseAccent),
                 const SizedBox(height: 12),
-                _metricCard('Games (Rolling)', 'Total Rolling', _fmt.format(125000000), Icons.sports_esports, cyanAccent),
+                _metricCard(l10n.gamesRolling, l10n.totalRolling, _fmt.format(125000000), Icons.sports_esports, cyanAccent),
               ],
             );
           },
@@ -104,8 +117,8 @@ class _MonthlyViewState extends State<MonthlyView> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Casino Integration', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                      Text('Monthly Accumulated Rolling (Casino)', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                      Text(l10n.casinoIntegration, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(l10n.monthlyAccumulatedRollingCasino, style: TextStyle(fontSize: 12, color: Colors.grey[400])),
                     ],
                   ),
                 ],
@@ -121,7 +134,7 @@ class _MonthlyViewState extends State<MonthlyView> {
                       for (int i = 0; i < _mockCasinoRolling.length; i++) ...[
                         if (i > 0) const SizedBox(height: 12),
                         _HorizontalCasinoBar(
-                          label: _mockCasinoRolling[i].key,
+                          label: _monthLabel(context, _mockCasinoRolling[i].key),
                           value: _mockCasinoRolling[i].value,
                           maxValue: maxRolling,
                           barHeight: barHeight,

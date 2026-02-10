@@ -5,12 +5,15 @@ class DrawerPanel extends StatelessWidget {
   final String title;
   final VoidCallback onClose;
   final Widget child;
+  /// When true, panel slides in from the left; otherwise from the right.
+  final bool fromLeft;
 
   const DrawerPanel({
     super.key,
     required this.title,
     required this.onClose,
     required this.child,
+    this.fromLeft = false,
   });
 
   @override
@@ -25,7 +28,7 @@ class DrawerPanel extends StatelessWidget {
               child: Container(color: Colors.black54),
             ),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: fromLeft ? Alignment.centerLeft : Alignment.centerRight,
               child: Material(
                 color: appBarBackground,
                 child: Container(
@@ -34,7 +37,10 @@ class DrawerPanel extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.9),
                   decoration: BoxDecoration(
                     color: appBarBackground,
-                    border: Border(left: BorderSide(color: borderColor)),
+                    border: Border(
+                      left: fromLeft ? BorderSide.none : BorderSide(color: borderColor),
+                      right: fromLeft ? BorderSide(color: borderColor) : BorderSide.none,
+                    ),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../generated/app_localizations.dart';
 import '../constants/mock_data.dart';
 import '../theme/app_theme.dart';
 
@@ -10,6 +11,7 @@ class RankingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -28,8 +30,8 @@ class RankingView extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('GUEST & AGENT RANKING', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5, fontStyle: FontStyle.italic)),
-                Text('Monthly Accumulated Performance Report', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                Text(l10n.guestAgentRanking, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5, fontStyle: FontStyle.italic)),
+                Text(l10n.monthlyPerformanceReport, style: TextStyle(fontSize: 12, color: Colors.grey[400])),
               ],
             ),
           ],
@@ -86,12 +88,12 @@ class RankingView extends StatelessWidget {
                               children: [
                                 Icon(Icons.trending_up, size: 12, color: emeraldAccent),
                                 const SizedBox(width: 4),
-                                Text('Wins: ', style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold)),
+                                Text(l10n.wins, style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold)),
                                 Text('₱${_fmt.format(item.winnings)}', style: TextStyle(fontSize: 10, color: emeraldAccent, fontWeight: FontWeight.bold)),
                                 const SizedBox(width: 16),
                                 Icon(Icons.trending_down, size: 12, color: roseAccent),
                                 const SizedBox(width: 4),
-                                Text('Losses: ', style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold)),
+                                Text(l10n.losses, style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold)),
                                 Text('₱${_fmt.format(item.losses)}', style: TextStyle(fontSize: 10, color: roseAccent, fontWeight: FontWeight.bold)),
                               ],
                             ),
@@ -101,7 +103,7 @@ class RankingView extends StatelessWidget {
                       const SizedBox(width: 24),
                       Column(
                         children: [
-                          Text('ROLLING VOLUME', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
+                          Text(l10n.rollingVolume, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
                           const SizedBox(height: 4),
                           Text('₱${_fmt.format(item.rolling)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                         ],
@@ -125,7 +127,7 @@ class RankingView extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const Center(child: Text('WIN RATIO', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.cyan))),
+                              Center(child: Text(l10n.winRatio, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.cyan))),
                             ],
                           ),
                         ),
