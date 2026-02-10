@@ -38,7 +38,9 @@ class StatCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxHeight < 90 || constraints.maxWidth < 140;
-        final padding = isCompact ? 8.0 : 12.0;
+        // Tablet/mid size: mas malaki padding para hindi mukhang lubog ang text
+        final isTabletSize = constraints.maxWidth >= 160 && constraints.maxWidth <= 320;
+        final padding = isCompact ? 8.0 : (isTabletSize ? 16.0 : 14.0);
         final spacing = isCompact ? 4.0 : 8.0;
         final valueFontSize = isCompact ? 14.0 : 18.0;
         return Container(
@@ -58,6 +60,7 @@ class StatCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -92,28 +95,37 @@ class StatCard extends StatelessWidget {
                 ],
               ),
               SizedBox(height: spacing),
-              Text(
-                label.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: Colors.grey[400],
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-              const SizedBox(height: 2),
-              Flexible(
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
                 child: Text(
-                  value,
+                  label.toUpperCase(),
                   style: TextStyle(
-                    fontSize: valueFontSize,
+                    fontSize: 9,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    letterSpacing: 1.2,
+                    color: Colors.grey[400],
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: valueFontSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                    ),
+                  ),
                 ),
               ),
               if (subValue != null)

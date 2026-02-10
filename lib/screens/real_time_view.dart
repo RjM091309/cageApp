@@ -24,13 +24,16 @@ class RealTimeView extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final crossAxisCount = constraints.maxWidth > 900 ? 5 : (constraints.maxWidth > 600 ? 3 : 2);
+            // Sa tablet (5 cols), mas mababa ratio = mas matangkad na card = hindi lubog ang text
+            final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
+            final aspectRatio = isTabletWidth ? 1.65 : 1.95;
             return GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 1.95,
+              childAspectRatio: aspectRatio,
               children: [
                 StatCard(
                   label: 'Total Chips',
