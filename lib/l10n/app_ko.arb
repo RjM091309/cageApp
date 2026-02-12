@@ -60,6 +60,7 @@
   "wins": "승: ",
   "losses": "패: ",
   "rollingVolume": "롤링 볼륨",
+  "winLoss": "승패",
   "winRatio": "승률",
   "totalChips": "총 칩",
   "cashBalance": "현금 잔액",
@@ -88,5 +89,6 @@
   "enterPassword": "비밀번호 입력",
   "saveLogin": "로그인 저장",
   "errorEnterCredentials": "사용자 이름과 비밀번호를 입력하세요",
-  "errorInvalidCredentials": "잘못된 사용자 이름 또는 비밀번호"
+  "errorInvalidCredentials": "잘못된 사용자 이름 또는 비밀번호",
+  "errorAdminOnlyAccess": "관리자만 이 앱에 접근할 수 있습니다."
 }

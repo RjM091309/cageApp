@@ -67,6 +67,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final user = await AuthService.instance.login(username: username, password: password);
     if (!mounted) return;
     if (user != null) {
+      if (user.permissions != 1) {
+        await AuthService.instance.logout();
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = AppLocalizations.of(context).errorAdminOnlyAccess;
+          _loading = false;
+        });
+        return;
+      }
       if (_rememberMe) {
         await AuthService.instance.saveRememberMe(username: username, password: password);
       } else {

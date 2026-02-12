@@ -11,6 +11,7 @@ class AuthUser {
   final String lastname;
   final int userId;
   final int permissions;
+  final String role;
 
   const AuthUser({
     required this.username,
@@ -18,6 +19,7 @@ class AuthUser {
     required this.lastname,
     required this.userId,
     required this.permissions,
+    this.role = 'User',
   });
 
   String get displayName {
@@ -57,6 +59,7 @@ class AuthService {
         lastname: map['lastname']?.toString() ?? '',
         userId: _int(map['user_id']),
         permissions: _int(map['permissions']),
+        role: map['role']?.toString()?.trim() ?? 'User',
       );
     } catch (_) {
       return null;
@@ -84,6 +87,7 @@ class AuthService {
         lastname: (userMap['lastname'] ?? '').toString(),
         userId: _int(userMap['user_id']),
         permissions: _int(userMap['permissions']),
+        role: (userMap['role']?.toString() ?? '').trim().isEmpty ? 'User' : (userMap['role']?.toString() ?? 'User').trim(),
       );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keyToken, token);
@@ -93,6 +97,7 @@ class AuthService {
         'lastname': user.lastname,
         'user_id': user.userId,
         'permissions': user.permissions,
+        'role': user.role,
       }));
       return user;
     } catch (_) {

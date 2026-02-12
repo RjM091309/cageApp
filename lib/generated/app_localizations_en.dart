@@ -195,6 +195,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rollingVolume => 'ROLLING VOLUME';
 
   @override
+  String get winLoss => 'WINLOSS';
+
+  @override
   String get winRatio => 'WIN RATIO';
 
   @override
@@ -280,4 +283,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorInvalidCredentials => 'Invalid username or password';
+
+  @override
+  String get errorAdminOnlyAccess => 'Only administrators can access this app.';
 }

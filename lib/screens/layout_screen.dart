@@ -52,11 +52,15 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
   StreamSubscription<bool>? _serverStatusSub;
   List<NotificationItem> _notifications = [];
   bool _notificationsLoading = false;
+  AuthUser? _currentUser;
 
   @override
   void initState() {
     super.initState();
     _cachedContent = _buildView(_activeView);
+    AuthService.instance.getStoredUser().then((user) {
+      if (mounted) setState(() => _currentUser = user);
+    });
     _isServerOnline = ServerStatusService.instance.isOnline;
     ServerStatusService.instance.start();
     _serverStatusSub = ServerStatusService.instance.isOnlineStream.listen((online) {
@@ -390,13 +394,14 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
               child: Builder(
                 builder: (context) {
                   final l10n = AppLocalizations.of(context);
+                  final user = _currentUser;
                   return Column(
                     children: [
                       CircleAvatar(radius: 40, backgroundColor: primaryIndigo, child: const Icon(Icons.person, size: 36, color: Colors.white)),
                       const SizedBox(height: 16),
-                      Text(l10n.bossExecutive, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(user?.displayName ?? l10n.bossExecutive, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 4),
-                      Text(l10n.adminAccessLevel1, style: TextStyle(fontSize: 12, color: emeraldAccent, fontWeight: FontWeight.bold)),
+                      Text(user?.permissions == 1 ? l10n.administrator : (user?.role ?? l10n.adminAccessLevel1), style: TextStyle(fontSize: 12, color: emeraldAccent, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 24),
                       _profileTile(Icons.settings, l10n.systemSettings, l10n.preferencesConfig),
                       _profileTile(Icons.security, l10n.securityPrivacy, l10n.keysAuthorization),
@@ -626,9 +631,9 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(AppLocalizations.of(context).executiveBoss, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), overflow: TextOverflow.ellipsis),
+                        Text(_currentUser?.displayName ?? AppLocalizations.of(context).executiveBoss, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
-                        Text(AppLocalizations.of(context).administrator, style: TextStyle(fontSize: 10, color: emeraldAccent)),
+                        Text(_currentUser?.permissions == 1 ? AppLocalizations.of(context).administrator : (_currentUser?.role ?? AppLocalizations.of(context).administrator), style: TextStyle(fontSize: 10, color: emeraldAccent), overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),

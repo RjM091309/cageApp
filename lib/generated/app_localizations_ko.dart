@@ -193,6 +193,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rollingVolume => '롤링 볼륨';
 
   @override
+  String get winLoss => '승패';
+
+  @override
   String get winRatio => '승률';
 
   @override
@@ -278,4 +281,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get errorInvalidCredentials => '잘못된 사용자 이름 또는 비밀번호';
+
+  @override
+  String get errorAdminOnlyAccess => '관리자만 이 앱에 접근할 수 있습니다.';
 }

@@ -182,7 +182,11 @@ class _RankingViewState extends State<RankingView> {
   }
 
   Widget _buildRankCard(BuildContext context, AppLocalizations l10n, RankingItem item) {
-    final winRatio = item.winnings + item.losses > 0 ? (item.winnings / (item.winnings + item.losses)) * 100 : 20.0;
+    final total = item.winnings + item.losses;
+    final winRatio = total > 0 ? (item.winnings / total) * 100 : 0.0;
+    final nameMatch = RegExp(r'^(.+?)\s*\(([^)]+)\)\s*$').firstMatch(item.name);
+    final displayName = nameMatch != null ? nameMatch.group(1)!.trim() : item.name;
+    final codeSubtitle = nameMatch != null ? nameMatch.group(2)!.trim() : null;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
@@ -226,23 +230,29 @@ class _RankingViewState extends State<RankingView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.trending_up, size: 12, color: emeraldAccent),
-                          const SizedBox(width: 4),
-                          Text(l10n.wins, style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold)),
-                          Text('₱${_fmt.format(item.winnings)}', style: TextStyle(fontSize: 10, color: emeraldAccent, fontWeight: FontWeight.bold)),
-                          const SizedBox(width: 16),
-                          Icon(Icons.trending_down, size: 12, color: roseAccent),
-                          const SizedBox(width: 4),
-                          Text(l10n.losses, style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.bold)),
-                          Text('₱${_fmt.format(item.losses)}', style: TextStyle(fontSize: 10, color: roseAccent, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
+                      Text(displayName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      if (codeSubtitle != null) ...[
+                        const SizedBox(height: 4),
+                        Text(codeSubtitle, style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.w500)),
+                      ],
                     ],
                   ),
+                ),
+                Builder(
+                  builder: (_) {
+                    final net = item.winnings - item.losses;
+                    final isZero = net == 0;
+                    final isNegative = net < 0;
+                    final text = isZero ? '0' : (isNegative ? '-₱${_fmt.format(net.abs())}' : '₱${_fmt.format(net)}');
+                    final color = isZero ? Colors.white : (isNegative ? roseAccent : emeraldAccent);
+                    return Column(
+                      children: [
+                        Text(l10n.winLoss, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
+                        const SizedBox(height: 4),
+                        Text(text, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(width: 24),
                 Column(
@@ -256,14 +266,15 @@ class _RankingViewState extends State<RankingView> {
                   const SizedBox(width: 24),
                   Container(
                     width: 80,
-                    height: 40,
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(8)),
                     child: Stack(
                       children: [
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
-                            height: (40 * (winRatio / 100).clamp(0.2, 1.0)),
+                            height: winRatio <= 0 ? 0.0 : (48 * (winRatio / 100).clamp(0.2, 1.0)),
                             width: 80,
                             decoration: BoxDecoration(
                               color: primaryIndigo.withValues(alpha: 0.2),
@@ -271,7 +282,16 @@ class _RankingViewState extends State<RankingView> {
                             ),
                           ),
                         ),
-                        Center(child: Text(l10n.winRatio, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: primaryIndigo))),
+                        Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(l10n.winRatio, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: primaryIndigo)),
+                              const SizedBox(height: 2),
+                              Text('${winRatio.toStringAsFixed(0)}%', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: primaryIndigo)),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),

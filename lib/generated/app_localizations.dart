@@ -458,6 +458,12 @@ abstract class AppLocalizations {
   /// **'ROLLING VOLUME'**
   String get rollingVolume;
 
+  /// No description provided for @winLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'WINLOSS'**
+  String get winLoss;
+
   /// No description provided for @winRatio.
   ///
   /// In en, this message translates to:
@@ -631,6 +637,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid username or password'**
   String get errorInvalidCredentials;
+
+  /// No description provided for @errorAdminOnlyAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Only administrators can access this app.'**
+  String get errorAdminOnlyAccess;
 }
 
 class _AppLocalizationsDelegate

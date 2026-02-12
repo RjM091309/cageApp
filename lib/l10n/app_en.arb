@@ -74,6 +74,7 @@
   "wins": "Wins: ",
   "losses": "Losses: ",
   "rollingVolume": "ROLLING VOLUME",
+  "winLoss": "WINLOSS",
   "winRatio": "WIN RATIO",
   "totalChips": "Total Chips",
   "cashBalance": "Cash Balance",
@@ -102,5 +103,6 @@
   "enterPassword": "Enter password",
   "saveLogin": "Save login",
   "errorEnterCredentials": "Enter username and password",
-  "errorInvalidCredentials": "Invalid username or password"
+  "errorInvalidCredentials": "Invalid username or password",
+  "errorAdminOnlyAccess": "Only administrators can access this app."
 }
