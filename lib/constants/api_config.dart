@@ -1,8 +1,8 @@
 /// Base URL for Infinity Cage X API and Socket.IO.
-/// - Android emulator: use http://10.0.2.2:4004
-/// - iOS simulator: use http://localhost:4004
+/// - Server (different network): http://45.32.103.210:4005
+/// - Local dev: http://localhost:4005 or http://192.168.x.x:4005
 
-const String apiBaseUrl = 'http://192.168.110.132:4005';
+const String apiBaseUrl = 'http://45.32.103.210:4005';
 
 String get realtimeApiUrl => '$apiBaseUrl/api/realtime';
 
