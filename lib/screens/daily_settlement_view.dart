@@ -1,9 +1,11 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../generated/app_localizations.dart';
-import '../constants/mock_data.dart';
+import '../services/daily_settlement_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/skeleton_box.dart';
 
 String _fmt(num v) {
   return NumberFormat.compact(locale: 'en_PH').format(v);
@@ -85,16 +87,16 @@ class _VerticalGamesWlBar extends StatelessWidget {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('$numGames', style: TextStyle(fontSize: labelFontSize, fontWeight: FontWeight.w700, color: const Color(0xFF0ea5e9))),
+                          Text('$numGames', style: TextStyle(fontSize: labelFontSize, fontWeight: FontWeight.w700, color: primaryIndigo)),
                           SizedBox(height: labelBarGap),
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 600),
                             curve: Curves.easeOutCubic,
                             height: animate ? gamesHeight : 0,
                             width: barWidth,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF0ea5e9),
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+                            decoration: BoxDecoration(
+                              color: primaryIndigo,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
                             ),
                           ),
                         ],
@@ -111,7 +113,7 @@ class _VerticalGamesWlBar extends StatelessWidget {
                             height: animate ? wlHeight : 0,
                             width: barWidth,
                             decoration: BoxDecoration(
-                              color: winLoss >= 0 ? const Color(0xFF14b8a6) : roseAccent,
+                              color: winLoss >= 0 ? emeraldAccent : roseAccent,
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
                             ),
                           ),
@@ -216,18 +218,175 @@ class DailySettlementView extends StatefulWidget {
 
 class _DailySettlementViewState extends State<DailySettlementView> {
   bool _chartAnimate = false;
+  bool _loading = true;
+  String? _error;
+  DailySettlementResult _result = DailySettlementResult.empty();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _chartAnimate = true);
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+      _chartAnimate = false;
     });
+    try {
+      final result = await DailySettlementService.instance.fetch();
+      if (!mounted) return;
+      setState(() {
+        _result = result;
+        _loading = false;
+      });
+      // Trigger chart animation after first build with data (initial spots → final spots)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _chartAnimate = true);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = 'Failed to load settlement data';
+      });
+    }
+  }
+
+  Widget _buildSkeletonContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final count = constraints.maxWidth > 600 ? 4 : 2;
+            return GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: count,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 1.85,
+              children: List.generate(4, (_) => _skeletonMetricTile()),
+            );
+          },
+        ),
+        SizedBox(height: MediaQuery.sizeOf(context).height > 600 ? 24 : 20),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isPortrait = constraints.maxWidth < 600;
+            final spacing = isPortrait ? 28.0 : 20.0;
+            final h = (isPortrait ? 360.0 : 320.0) * (MediaQuery.sizeOf(context).height / 700).clamp(0.85, 1.15);
+            if (isPortrait) {
+              return Column(
+                children: [
+                  SizedBox(height: h, child: _skeletonChartCard()),
+                  SizedBox(height: spacing),
+                  SizedBox(height: h, child: _skeletonChartCard()),
+                  SizedBox(height: spacing),
+                  SizedBox(height: h, child: _skeletonChartCard()),
+                  SizedBox(height: spacing),
+                  SizedBox(height: h, child: _skeletonChartCard()),
+                ],
+              );
+            }
+            return Column(
+              children: [
+                SizedBox(
+                  height: h,
+                  child: Row(
+                    children: [
+                      Expanded(child: _skeletonChartCard()),
+                      SizedBox(width: spacing),
+                      Expanded(child: _skeletonChartCard()),
+                    ],
+                  ),
+                ),
+                SizedBox(height: spacing),
+                SizedBox(
+                  height: h,
+                  child: Row(
+                    children: [
+                      Expanded(child: _skeletonChartCard()),
+                      SizedBox(width: spacing),
+                      Expanded(child: _skeletonChartCard()),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _skeletonMetricTile() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SkeletonBox(height: 10, width: 80, borderRadius: 4),
+          const SizedBox(height: 8),
+          SkeletonBox(height: 18, width: 60, borderRadius: 4),
+        ],
+      ),
+    );
+  }
+
+  Widget _skeletonChartCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SkeletonBox(width: 20, height: 20, borderRadius: 6),
+              const SizedBox(width: 8),
+              SkeletonBox(width: 140, height: 16, borderRadius: 4),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(child: SkeletonBox(height: double.infinity, borderRadius: 8)),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    if (_loading && _result.days.isEmpty) {
+      return _buildSkeletonContent(context);
+    }
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_error!, style: TextStyle(color: Colors.grey[400])),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: _load,
+                style: FilledButton.styleFrom(backgroundColor: primaryIndigo),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    final r = _result;
+    final totalBuyInStr = NumberFormat.currency(locale: 'en_PH', symbol: '₱', decimalDigits: 0).format(r.totalBuyIn);
+    final avgRollingStr = NumberFormat.currency(locale: 'en_PH', symbol: '₱', decimalDigits: 0).format(r.avgRolling.round());
+    final winRateStr = '${r.winRatePercent >= 0 ? '+' : ''}${r.winRatePercent.toStringAsFixed(1)}%';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -243,10 +402,10 @@ class _DailySettlementViewState extends State<DailySettlementView> {
               crossAxisSpacing: 16,
               childAspectRatio: 1.85,
               children: [
-                _metricTile(l10n.totalBuyIn, '₱24.5M'),
-                _metricTile(l10n.avgRolling, '₱10.2M'),
-                _metricTile(l10n.winRate, '+14.2%', isGreen: true),
-                _metricTile(l10n.totalGames, '174'),
+                _metricTile(l10n.totalBuyIn, totalBuyInStr),
+                _metricTile(l10n.avgRolling, avgRollingStr),
+                _metricTile(l10n.winRate, winRateStr, isGreen: r.winRatePercent >= 0),
+                _metricTile(l10n.totalGames, '${r.totalGames}'),
               ],
             );
           },
@@ -333,9 +492,10 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     final titleSize = isCompact ? 13.0 : (media.width < 400 ? 14.0 : 16.0);
     final padding = isCompact ? 12.0 : 16.0;
 
-    final maxGames = mockDailySettlement.map((e) => e.numGames).reduce((a, b) => a > b ? a : b);
-    final minWL = mockDailySettlement.map((e) => e.winLoss).reduce((a, b) => a < b ? a : b);
-    final maxWL = mockDailySettlement.map((e) => e.winLoss).reduce((a, b) => a > b ? a : b);
+    final days = _result.days;
+    final maxGames = days.isEmpty ? 0 : days.map((e) => e.numGames).reduce((a, b) => a > b ? a : b);
+    final minWL = days.isEmpty ? 0 : days.map((e) => e.winLoss).reduce((a, b) => a < b ? a : b);
+    final maxWL = days.isEmpty ? 0 : days.map((e) => e.winLoss).reduce((a, b) => a > b ? a : b);
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -344,7 +504,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
         children: [
           Row(
             children: [
-              Icon(Icons.grid_view, size: isCompact ? 16 : 20, color: Colors.blue[300]),
+              Icon(Icons.grid_view, size: isCompact ? 16 : 20, color: accentPurple),
               SizedBox(width: isCompact ? 6 : 8),
               Text(AppLocalizations.of(context).numberOfGamesWinLoss, style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w600, color: Colors.white)),
             ],
@@ -353,22 +513,22 @@ class _DailySettlementViewState extends State<DailySettlementView> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final itemCount = mockDailySettlement.length;
-                final totalGap = gapBetweenDays * (itemCount - 1);
+                final itemCount = days.length;
+                final totalGap = itemCount <= 1 ? 0.0 : gapBetweenDays * (itemCount - 1);
                 final availableWidth = constraints.maxWidth.isFinite ? constraints.maxWidth : 400.0;
-                final widthPerDay = ((availableWidth - totalGap) / itemCount).clamp(minWidthPerDay, double.infinity);
+                final widthPerDay = itemCount == 0 ? minWidthPerDay : ((availableWidth - totalGap) / itemCount).clamp(minWidthPerDay, double.infinity);
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    for (int i = 0; i < mockDailySettlement.length; i++) ...[
+                    for (int i = 0; i < days.length; i++) ...[
                       if (i > 0) SizedBox(width: gapBetweenDays),
                       SizedBox(
                         width: widthPerDay,
                         child: _VerticalGamesWlBar(
-                          date: mockDailySettlement[i].date,
-                          numGames: mockDailySettlement[i].numGames,
-                          winLoss: mockDailySettlement[i].winLoss,
+                          date: days[i].date,
+                          numGames: days[i].numGames,
+                          winLoss: days[i].winLoss,
                           maxGames: maxGames,
                           minWL: minWL,
                           maxWL: maxWL,
@@ -394,11 +554,14 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     final labelFontSize = isCompact ? 8.0 : 10.0;
     final valueFontSize = isCompact ? 8.0 : 9.0;
 
-    final minY = mockDailySettlement.map((e) => e.winLoss).reduce((a, b) => a < b ? a : b) * 1.1;
-    final maxY = mockDailySettlement.map((e) => e.winLoss).reduce((a, b) => a > b ? a : b) * 1.1;
+    final days = _result.days;
+    // Baseline = 0 at bottom so "+0" days (Thu–Sun) sit on the bottom, not elevated
+    final minY = 0.0;
+    final rawMax = days.isEmpty ? 0 : days.map((e) => e.winLoss).reduce((a, b) => a > b ? a : b);
+    final maxY = rawMax <= 0 ? 1.0 : rawMax * 1.15;
     final spots = _chartAnimate
-        ? mockDailySettlement.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.winLoss.toDouble())).toList()
-        : List.generate(mockDailySettlement.length, (i) => FlSpot(i.toDouble(), minY));
+        ? days.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.winLoss.toDouble().clamp(minY.toDouble(), double.infinity))).toList()
+        : List.generate(days.length, (i) => FlSpot(i.toDouble(), minY));
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -426,7 +589,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                 ),
                 borderData: FlBorderData(show: false),
                 minX: 0,
-                maxX: (mockDailySettlement.length - 1).toDouble(),
+                maxX: (days.isEmpty ? 0 : days.length - 1).toDouble(),
                 minY: minY,
                 maxY: maxY,
                 lineBarsData: [
@@ -447,18 +610,18 @@ class _DailySettlementViewState extends State<DailySettlementView> {
           SizedBox(height: isCompact ? 6 : 8),
           Row(
             children: [
-              for (int i = 0; i < mockDailySettlement.length; i++)
+              for (int i = 0; i < days.length; i++)
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(mockDailySettlement[i].date, style: TextStyle(fontSize: labelFontSize, color: Colors.grey[400])),
+                      Text(days[i].date, style: TextStyle(fontSize: labelFontSize, color: Colors.grey[400])),
                       const SizedBox(height: 2),
                       Text(
-                        _fmtWL(mockDailySettlement[i].winLoss),
+                        _fmtWL(days[i].winLoss),
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: valueFontSize, fontWeight: FontWeight.w600, color: mockDailySettlement[i].winLoss >= 0 ? emeraldAccent : roseAccent),
+                        style: TextStyle(fontSize: valueFontSize, fontWeight: FontWeight.w600, color: days[i].winLoss >= 0 ? emeraldAccent : roseAccent),
                       ),
                     ],
                   ),
@@ -478,7 +641,8 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     final maxBarHeight = isCompact ? 36.0 : 44.0;
     final minBarHeight = isCompact ? 18.0 : 24.0;
 
-    final maxCommission = mockDailySettlement.map((e) => e.commission).reduce((a, b) => a > b ? a : b).toDouble();
+    final days = _result.days;
+    final maxCommission = days.isEmpty ? 1.0 : days.map((e) => e.commission).reduce((a, b) => a > b ? a : b).toDouble();
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -496,14 +660,14 @@ class _DailySettlementViewState extends State<DailySettlementView> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final barHeight = (constraints.maxHeight / mockDailySettlement.length).clamp(minBarHeight, maxBarHeight) - 4;
+                final barHeight = days.isEmpty ? minBarHeight : (constraints.maxHeight / days.length).clamp(minBarHeight, maxBarHeight) - 4;
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    for (int i = 0; i < mockDailySettlement.length; i++)
+                    for (int i = 0; i < days.length; i++)
                       _HorizontalCommissionBar(
-                        date: mockDailySettlement[i].date,
-                        commission: mockDailySettlement[i].commission,
+                        date: days[i].date,
+                        commission: days[i].commission,
                         maxCommission: maxCommission,
                         barHeight: barHeight,
                         animate: _chartAnimate,
@@ -518,6 +682,10 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     );
   }
 
+  static double _logExpense(int value) {
+    return value <= 0 ? 0.0 : log(value.toDouble() + 1);
+  }
+
   Widget _expensesChartCard(BuildContext context) {
     final media = MediaQuery.sizeOf(context);
     final isCompact = media.width < 360;
@@ -526,10 +694,15 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     final labelFontSize = isCompact ? 8.0 : 10.0;
     final valueFontSize = isCompact ? 8.0 : 9.0;
 
-    final maxY = mockDailySettlement.map((e) => e.expenses).reduce((a, b) => a > b ? a : b) * 1.2;
+    final days = _result.days;
+    // Use log scale so small values (e.g. 3K) are visible vs 0 when max is huge (e.g. 3.03M)
+    final maxLogY = days.isEmpty
+        ? 1.0
+        : days.map((e) => _logExpense(e.expenses)).reduce((a, b) => a > b ? a : b) * 1.15;
+    final minLogY = 0.0;
     final spots = _chartAnimate
-        ? mockDailySettlement.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.expenses.toDouble())).toList()
-        : List.generate(mockDailySettlement.length, (i) => FlSpot(i.toDouble(), 0.0));
+        ? days.asMap().entries.map((e) => FlSpot(e.key.toDouble(), _logExpense(e.value.expenses))).toList()
+        : List.generate(days.length, (i) => FlSpot(i.toDouble(), minLogY));
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -545,49 +718,51 @@ class _DailySettlementViewState extends State<DailySettlementView> {
           ),
           SizedBox(height: isCompact ? 12 : 16),
           Expanded(
-            child: LineChart(
-              LineChartData(
-                lineTouchData: const LineTouchData(enabled: false),
-                gridData: const FlGridData(show: false),
-                titlesData: const FlTitlesData(
-                  bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                borderData: FlBorderData(show: false),
-                minX: 0,
-                maxX: (mockDailySettlement.length - 1).toDouble(),
-                minY: 0,
-                maxY: maxY,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    color: roseAccent,
-                    barWidth: 3,
-                    belowBarData: BarAreaData(show: true, color: roseAccent.withValues(alpha: 0.1)),
-                    dotData: const FlDotData(show: false),
+            child: ClipRect(
+              child: LineChart(
+                LineChartData(
+                  lineTouchData: const LineTouchData(enabled: false),
+                  gridData: const FlGridData(show: false),
+                  titlesData: const FlTitlesData(
+                    bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
-                ],
+                  borderData: FlBorderData(show: false),
+                  minX: 0,
+                  maxX: (days.isEmpty ? 0 : days.length - 1).toDouble(),
+                  minY: minLogY,
+                  maxY: maxLogY,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: false,
+                      color: roseAccent,
+                      barWidth: 3,
+                      belowBarData: BarAreaData(show: true, color: roseAccent.withValues(alpha: 0.1)),
+                      dotData: const FlDotData(show: false),
+                    ),
+                  ],
+                ),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic,
               ),
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutCubic,
             ),
           ),
           SizedBox(height: isCompact ? 6 : 8),
           Row(
             children: [
-              for (int i = 0; i < mockDailySettlement.length; i++)
+              for (int i = 0; i < days.length; i++)
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(mockDailySettlement[i].date, style: TextStyle(fontSize: labelFontSize, color: Colors.grey[400])),
+                      Text(days[i].date, style: TextStyle(fontSize: labelFontSize, color: Colors.grey[400])),
                       const SizedBox(height: 2),
                       Text(
-                        _fmt(mockDailySettlement[i].expenses),
+                        _fmt(days[i].expenses),
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: valueFontSize, fontWeight: FontWeight.w600, color: roseAccent),
                       ),

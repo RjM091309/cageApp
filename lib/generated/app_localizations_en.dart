@@ -42,6 +42,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get systemStatusLive => 'System Status: Live';
 
   @override
+  String get systemStatusOffline => 'System Status: Offline';
+
+  @override
   String get notifications => 'Notifications';
 
   @override
@@ -222,16 +225,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get table => 'Table';
 
   @override
+  String get gameType => 'Game type';
+
+  @override
   String get buyIn => 'Buy-In';
 
   @override
   String get status => 'Status';
 
   @override
-  String get statusActive => 'Active';
+  String get statusActive => 'On Game';
 
   @override
   String get statusSettling => 'Settling';
+
+  @override
+  String get noGamesToday => 'No Games Today';
 
   @override
   String get language => 'Language';

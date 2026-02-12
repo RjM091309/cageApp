@@ -1,29 +1,22 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'generated/app_localizations.dart';
-import 'theme/app_theme.dart';
-import 'screens/layout_screen.dart';
 
-void main() {
+import 'generated/app_localizations.dart';
+import 'platform_init_stub.dart' if (dart.library.io) 'platform_init_io.dart' as platform_init;
+import 'screens/layout_screen.dart';
+import 'theme/app_theme.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb && Platform.isAndroid) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  if (!kIsWeb) await platform_init.initAndroidIfNeeded();
+  if (kIsWeb || !platform_init.isAndroid) {
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-      ),
-    );
-  } else {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
+      SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Color(0xFF01081A),
+        systemNavigationBarColor: surfaceColor,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
     );
@@ -61,7 +54,7 @@ class AppCageApp extends StatefulWidget {
 }
 
 class _AppCageAppState extends State<AppCageApp> {
-  Locale? _locale;
+  Locale? _locale = const Locale('ko');
 
   void _setLocale(Locale? locale) {
     setState(() => _locale = locale);
@@ -88,7 +81,7 @@ class _AppCageAppState extends State<AppCageApp> {
           for (final s in supported) {
             if (s.languageCode == locale?.languageCode) return s;
           }
-          return const Locale('en');
+          return const Locale('ko');
         },
         home: const LayoutScreen(),
       ),

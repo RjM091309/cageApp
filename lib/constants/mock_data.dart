@@ -1,10 +1,10 @@
 import '../models/types.dart';
 
 final mockOngoingGames = <OngoingGame>[
-  OngoingGame(id: '1', account: 'VIP-G881', buyIn: 250000, table: 'Bacc-01', status: 'Active'),
-  OngoingGame(id: '2', account: 'AGENT-KRX', buyIn: 120000, table: 'Roulette-04', status: 'Active'),
-  OngoingGame(id: '3', account: 'VIP-J99', buyIn: 500000, table: 'Bacc-03', status: 'Settling'),
-  OngoingGame(id: '4', account: 'VIP-A40', buyIn: 75000, table: 'Poker-02', status: 'Active'),
+  OngoingGame(id: '1', account: 'VIP-G881', buyIn: 250000, table: 'Bacc-01', gameType: 'LIVE', status: 'Active'),
+  OngoingGame(id: '2', account: 'AGENT-KRX', buyIn: 120000, table: 'Roulette-04', gameType: 'TELEBET', status: 'Active'),
+  OngoingGame(id: '3', account: 'VIP-J99', buyIn: 500000, table: 'Bacc-03', gameType: 'LIVE', status: 'Settling'),
+  OngoingGame(id: '4', account: 'VIP-A40', buyIn: 75000, table: 'Poker-02', gameType: 'LIVE', status: 'Active'),
 ];
 
 final mockDailySettlement = <SettlementData>[
@@ -18,11 +18,11 @@ final mockDailySettlement = <SettlementData>[
 ];
 
 final mockMarkers = <MarkerEntry>[
-  MarkerEntry(guest: 'John Smith (VIP-88)', balance: 1500000, limit: 2000000, lastUpdate: '10:45 AM'),
-  MarkerEntry(guest: 'Jane Doe (VIP-12)', balance: 800000, limit: 1000000, lastUpdate: '11:20 AM'),
-  MarkerEntry(guest: 'Chen Wei (VIP-45)', balance: 4200000, limit: 5000000, lastUpdate: '09:15 AM'),
-  MarkerEntry(guest: 'Sarah Connor (VIP-01)', balance: 250000, limit: 500000, lastUpdate: '12:01 PM'),
-  MarkerEntry(guest: 'Bruce Wayne (VIP-BAT)', balance: 12000000, limit: 15000000, lastUpdate: '11:55 AM'),
+  MarkerEntry(guest: 'Golden Dragon Agency', agent: 'John Smith (VIP-88)', balance: 1500000, limit: 2000000, lastUpdate: '10:45 AM'),
+  MarkerEntry(guest: 'Silver Tiger Agency', agent: 'Jane Doe (VIP-12)', balance: 800000, limit: 1000000, lastUpdate: '11:20 AM'),
+  MarkerEntry(guest: 'Phoenix Agency', agent: 'Chen Wei (VIP-45)', balance: 4200000, limit: 5000000, lastUpdate: '09:15 AM'),
+  MarkerEntry(guest: 'Jade Emperor Agency', agent: 'Sarah Connor (VIP-01)', balance: 250000, limit: 500000, lastUpdate: '12:01 PM'),
+  MarkerEntry(guest: 'Infinity Agency', agent: 'Bruce Wayne (VIP-BAT)', balance: 12000000, limit: 15000000, lastUpdate: '11:55 AM'),
 ];
 
 final mockRanking = <RankingItem>[

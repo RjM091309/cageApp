@@ -164,6 +164,12 @@ abstract class AppLocalizations {
   /// **'System Status: Live'**
   String get systemStatusLive;
 
+  /// No description provided for @systemStatusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'System Status: Offline'**
+  String get systemStatusOffline;
+
   /// No description provided for @notifications.
   ///
   /// In en, this message translates to:
@@ -512,6 +518,12 @@ abstract class AppLocalizations {
   /// **'Table'**
   String get table;
 
+  /// No description provided for @gameType.
+  ///
+  /// In en, this message translates to:
+  /// **'Game type'**
+  String get gameType;
+
   /// No description provided for @buyIn.
   ///
   /// In en, this message translates to:
@@ -527,7 +539,7 @@ abstract class AppLocalizations {
   /// No description provided for @statusActive.
   ///
   /// In en, this message translates to:
-  /// **'Active'**
+  /// **'On Game'**
   String get statusActive;
 
   /// No description provided for @statusSettling.
@@ -535,6 +547,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settling'**
   String get statusSettling;
+
+  /// No description provided for @noGamesToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No Games Today'**
+  String get noGamesToday;
 
   /// No description provided for @language.
   ///

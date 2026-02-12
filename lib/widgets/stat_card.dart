@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-enum StatCardColor { cyan, blue, emerald, rose, amber }
+enum StatCardColor { primary, purple, emerald, rose, amber }
 
 class StatCard extends StatelessWidget {
   final String label;
   final String value;
+  /// If set, this widget is shown instead of [value] text (e.g. for animated counter).
+  final Widget? valueWidget;
   final String? subValue;
   final IconData icon;
   final StatCardColor color;
@@ -16,17 +18,18 @@ class StatCard extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
+    this.valueWidget,
     this.subValue,
     required this.icon,
-    this.color = StatCardColor.cyan,
+    this.color = StatCardColor.primary,
     this.trendValue,
     this.trendIsUp,
   });
 
   Color get _colorValue {
     switch (color) {
-      case StatCardColor.cyan: return cyanAccent;
-      case StatCardColor.blue: return Colors.blue;
+      case StatCardColor.primary: return primaryIndigo;
+      case StatCardColor.purple: return accentPurple;
       case StatCardColor.emerald: return emeraldAccent;
       case StatCardColor.rose: return roseAccent;
       case StatCardColor.amber: return amberAccent;
@@ -116,14 +119,17 @@ class StatCard extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: Text(
-                      value,
+                    child: DefaultTextStyle(
                       style: TextStyle(
                         fontSize: valueFontSize,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      maxLines: 1,
+                      child: valueWidget ??
+                          Text(
+                            value,
+                            maxLines: 1,
+                          ),
                     ),
                   ),
                 ),

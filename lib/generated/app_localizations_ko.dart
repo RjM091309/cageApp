@@ -42,6 +42,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get systemStatusLive => '시스템 상태: 라이브';
 
   @override
+  String get systemStatusOffline => '시스템 상태: 오프라인';
+
+  @override
   String get notifications => '알림';
 
   @override
@@ -220,16 +223,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get table => '테이블';
 
   @override
+  String get gameType => '게임 종류';
+
+  @override
   String get buyIn => '바이인';
 
   @override
   String get status => '상태';
 
   @override
-  String get statusActive => '활성';
+  String get statusActive => '게임 중';
 
   @override
   String get statusSettling => '정산 중';
+
+  @override
+  String get noGamesToday => '오늘 게임 없음';
 
   @override
   String get language => '언어';
