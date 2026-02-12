@@ -7,6 +7,7 @@ import '../generated/app_localizations.dart';
 import '../main.dart';
 import '../models/types.dart';
 import '../theme/app_theme.dart';
+import '../services/auth_service.dart';
 import '../services/server_status_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/active_view_scope.dart';
@@ -29,7 +30,9 @@ List<(ViewType, String, IconData)> navItems(BuildContext context) {
 }
 
 class LayoutScreen extends StatefulWidget {
-  const LayoutScreen({super.key});
+  const LayoutScreen({super.key, this.onLogout});
+
+  final VoidCallback? onLogout;
 
   @override
   State<LayoutScreen> createState() => _LayoutScreenState();
@@ -405,7 +408,12 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
                         leading: Icon(Icons.logout, color: roseAccent, size: 20),
                         title: Text(l10n.logOut, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                         subtitle: Text(l10n.terminateSession, style: TextStyle(fontSize: 10, color: roseAccent.withValues(alpha: 0.8))),
-                        onTap: () {},
+                        onTap: () async {
+                          setState(() => _profileOpen = false);
+                          await AuthService.instance.logout();
+                          if (!mounted) return;
+                          widget.onLogout?.call();
+                        },
                       ),
                       const SizedBox(height: 16),
                       Container(

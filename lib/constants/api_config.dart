@@ -1,8 +1,11 @@
 /// Base URL for Infinity Cage X API and Socket.IO.
-/// - Server (different network): http://45.32.103.210:4005
+/// - Production (domain + HTTPS): https://yourdomain.com  (no port; Nginx proxies to backend)
+/// - Server (IP): http://45.32.103.210:4005
 /// - Local dev: http://localhost:4005 or http://192.168.x.x:4005
 
-const String apiBaseUrl = 'http://45.32.103.210:4005';
+const String apiBaseUrl = 'http://192.168.110.132:4005';
+
+String get loginApiUrl => '$apiBaseUrl/api/auth/login';
 
 String get realtimeApiUrl => '$apiBaseUrl/api/realtime';
 

@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/app_localizations.dart';
 import 'platform_init_stub.dart' if (dart.library.io) 'platform_init_io.dart' as platform_init;
 import 'screens/layout_screen.dart';
+import 'screens/login_screen.dart';
+import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -83,8 +85,62 @@ class _AppCageAppState extends State<AppCageApp> {
           }
           return const Locale('ko');
         },
-        home: const LayoutScreen(),
+        home: const _AuthGate(),
       ),
     );
+  }
+}
+
+/// Shows LoginScreen until user has a stored token, then LayoutScreen.
+class _AuthGate extends StatefulWidget {
+  const _AuthGate();
+
+  @override
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  bool _loading = true;
+  bool _isLoggedIn = false;
+
+  Future<void> _checkAuth() async {
+    final token = await AuthService.instance.getToken();
+    if (!mounted) return;
+    setState(() {
+      _isLoggedIn = token != null && token.isNotEmpty;
+      _loading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  void _onLoginSuccess() {
+    setState(() => _isLoggedIn = true);
+  }
+
+  void _onLogout() {
+    setState(() => _isLoggedIn = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(gradient: scaffoldGradient),
+          child: Center(
+            child: CircularProgressIndicator(color: primaryIndigo),
+          ),
+        ),
+      );
+    }
+    if (_isLoggedIn) {
+      return LayoutScreen(onLogout: _onLogout);
+    }
+    return LoginScreen(onLoginSuccess: _onLoginSuccess);
   }
 }
