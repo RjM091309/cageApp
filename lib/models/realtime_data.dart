@@ -45,6 +45,7 @@ class RealtimeData {
         id: (m['game_id'] ?? '').toString(),
         account: accountLabel,
         buyIn: _num(m, 'buyin'),
+        cashOut: _num(m, 'cashout'),
         table: (m['encoded_dt'] ?? '').toString(),
         gameType: (m['game_type'] ?? '').toString(),
         status: 'Active',

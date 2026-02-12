@@ -4,6 +4,7 @@ class OngoingGame {
   final String id;
   final String account;
   final int buyIn;
+  final int cashOut;
   final String table;
   final String gameType; // e.g. LIVE, TELEBET
   final String status; // 'Active' | 'Settling'
@@ -12,6 +13,7 @@ class OngoingGame {
     required this.id,
     required this.account,
     required this.buyIn,
+    required this.cashOut,
     required this.table,
     required this.gameType,
     required this.status,

@@ -86,14 +86,26 @@ class _RealTimeViewState extends State<RealTimeView> {
     });
   }
 
+  /// Dedupe key -> last sent time (shared across instances to avoid duplicate notifications).
+  static final Map<String, DateTime> _lastBuyInNotify = {};
+  static final Map<String, DateTime> _lastCashOutNotify = {};
+  static final Map<String, DateTime> _lastNewGameNotify = {};
+  static final Map<String, DateTime> _lastGameEndedNotify = {};
+  static const _notifyWindow = Duration(seconds: 15);
+
   /// When new games or buy-in changes appear in realtime data, create notifications for the executive.
   void _notifyNewOngoingGamesIfAny(RealtimeData data) {
     final previousById = {for (final g in _data.ongoingGames) g.id: g};
     final previousIds = previousById.keys.toSet();
+    final now = DateTime.now();
 
-    // New game started
+    // New game started (dedupe by game id)
+    _lastNewGameNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
     final newGames = data.ongoingGames.where((g) => !previousIds.contains(g.id)).toList();
     for (final g in newGames) {
+      final dedupeKey = 'newgame-${g.id}';
+      if (_lastNewGameNotify.containsKey(dedupeKey)) continue;
+      _lastNewGameNotify[dedupeKey] = now;
       NotificationService.instance.createNotification(
         title: 'New game started',
         message: '${g.account} – Buy-in ${_fmt.format(g.buyIn)} at ${_formatTableDateTime(g.table)} (${g.gameType})',
@@ -102,14 +114,55 @@ class _RealTimeViewState extends State<RealTimeView> {
     }
 
     // Buy-in added to current game (show time when we detected it, not game start time)
+    // Dedupe: only one notification per (gameId, new buyIn) within a short window (avoids double from two instances or race).
+    _lastBuyInNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
     for (final g in data.ongoingGames) {
       final prev = previousById[g.id];
       if (prev == null || g.buyIn <= prev.buyIn) continue;
+      final dedupeKey = 'buyin-${g.id}-${g.buyIn}';
+      if (_lastBuyInNotify.containsKey(dedupeKey)) continue;
+      _lastBuyInNotify[dedupeKey] = now;
       final added = g.buyIn - prev.buyIn;
-      final nowStr = _dateTimeFmt.format(DateTime.now());
+      final nowStr = _dateTimeFmt.format(now);
       NotificationService.instance.createNotification(
         title: 'Buy-in added',
         message: '${g.account} added ${_fmt.format(added)} at $nowStr – total ${_fmt.format(g.buyIn)} (${g.gameType})',
+        type: 'info',
+      );
+    }
+
+    // Cash-out added to current game (same setup as buy-in; dedupe per gameId + new cashOut)
+    _lastCashOutNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
+    for (final g in data.ongoingGames) {
+      final prev = previousById[g.id];
+      if (prev == null || g.cashOut <= prev.cashOut) continue;
+      final dedupeKey = 'cashout-${g.id}-${g.cashOut}';
+      if (_lastCashOutNotify.containsKey(dedupeKey)) continue;
+      _lastCashOutNotify[dedupeKey] = now;
+      final added = g.cashOut - prev.cashOut;
+      final nowStr = _dateTimeFmt.format(now);
+      NotificationService.instance.createNotification(
+        title: 'Cash-out added',
+        message: '${g.account} cashed out ${_fmt.format(added)} at $nowStr – total ${_fmt.format(g.cashOut)} (${g.gameType})',
+        type: 'warning',
+      );
+    }
+
+    // Game ended: was in previous ongoing list but not in current (end game in gamebook)
+    final currentIds = data.ongoingGames.map((g) => g.id).toSet();
+    final endedIds = previousIds.difference(currentIds);
+    _lastGameEndedNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
+    for (final id in endedIds) {
+      final g = previousById[id];
+      if (g == null) continue;
+      final dedupeKey = 'ended-${g.id}';
+      if (_lastGameEndedNotify.containsKey(dedupeKey)) continue;
+      _lastGameEndedNotify[dedupeKey] = now;
+      final nowStr = _dateTimeFmt.format(now);
+      final winLoss = g.buyIn - g.cashOut;
+      NotificationService.instance.createNotification(
+        title: 'Game has ended',
+        message: '${g.account} – game ended at $nowStr (${g.gameType}) – Win/Loss: ${_fmt.format(winLoss)}',
         type: 'info',
       );
     }
@@ -176,7 +229,8 @@ class _RealTimeViewState extends State<RealTimeView> {
                       0: FlexColumnWidth(1.5),
                       1: FlexColumnWidth(1),
                       2: FlexColumnWidth(1.2),
-                      3: FlexColumnWidth(0.8),
+                      3: FlexColumnWidth(1.2),
+                      4: FlexColumnWidth(0.8),
                     },
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     children: [
@@ -187,10 +241,12 @@ class _RealTimeViewState extends State<RealTimeView> {
                           _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
                           _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
                           _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
+                          _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
                         ],
                       ),
                       ...List.generate(6, (_) => TableRow(
                         children: [
+                          _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
                           _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
                           _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
                           _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
@@ -339,7 +395,8 @@ class _RealTimeViewState extends State<RealTimeView> {
                       0: FlexColumnWidth(1.5),
                       1: FlexColumnWidth(1),
                       2: FlexColumnWidth(1.2),
-                      3: FlexColumnWidth(0.8),
+                      3: FlexColumnWidth(1.2),
+                      4: FlexColumnWidth(0.8),
                     },
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     children: [
@@ -349,6 +406,7 @@ class _RealTimeViewState extends State<RealTimeView> {
                           _tableCell(Text(l10n.account, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
                           _tableCell(Text(l10n.gameType, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
                           _tableCell(Text(l10n.buyIn, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
+                          _tableCell(Text(l10n.cashOut, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
                           _tableCell(Text(l10n.status, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
                         ],
                       ),
@@ -359,6 +417,7 @@ class _RealTimeViewState extends State<RealTimeView> {
                             _tableCell(Text(g.account, style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500))),
                             _tableCell(Text(g.gameType, style: TextStyle(fontSize: 13, color: Colors.grey[400]))),
                             _tableCell(Text(_fmt.format(g.buyIn), style: TextStyle(fontSize: 13, color: primaryIndigo, fontFamily: 'monospace'))),
+                            _tableCell(Text(_fmt.format(g.cashOut), style: TextStyle(fontSize: 13, color: amberAccent, fontFamily: 'monospace'))),
                             _tableCell(
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 6),

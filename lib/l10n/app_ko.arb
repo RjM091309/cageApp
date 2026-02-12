@@ -72,6 +72,7 @@
   "table": "테이블",
   "gameType": "게임 종류",
   "buyIn": "바이인",
+  "cashOut": "캐시아웃",
   "status": "상태",
   "statusActive": "게임 중",
   "statusSettling": "정산 중",

@@ -530,6 +530,12 @@ abstract class AppLocalizations {
   /// **'Buy-In'**
   String get buyIn;
 
+  /// No description provided for @cashOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Out'**
+  String get cashOut;
+
   /// No description provided for @status.
   ///
   /// In en, this message translates to:

@@ -359,7 +359,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
                                         ],
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(n.message, style: TextStyle(fontSize: 13, color: Colors.grey[300])),
+                                      _buildNotificationMessage(n.message),
                                     ],
                                   ),
                                 ),
@@ -480,6 +480,32 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
       default:
         return primaryIndigo;
     }
+  }
+
+  static const _winLossPrefix = ' – Win/Loss: ';
+
+  Widget _buildNotificationMessage(String message) {
+    final grey = TextStyle(fontSize: 13, color: Colors.grey[300]);
+    final idx = message.indexOf(_winLossPrefix);
+    if (idx < 0) {
+      return Text(message, style: grey);
+    }
+    final before = message.substring(0, idx);
+    final winLossPart = message.substring(idx + _winLossPrefix.length);
+    final isNegative = winLossPart.trim().startsWith('-') || winLossPart.contains('−');
+    final winLossColor = isNegative ? roseAccent : emeraldAccent;
+    return RichText(
+      text: TextSpan(
+        style: grey,
+        children: [
+          TextSpan(text: before),
+          TextSpan(
+            text: _winLossPrefix + winLossPart,
+            style: TextStyle(fontSize: 13, color: winLossColor, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _profileTile(IconData icon, String label, String sub) {

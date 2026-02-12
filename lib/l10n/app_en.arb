@@ -86,6 +86,7 @@
   "table": "Table",
   "gameType": "Game type",
   "buyIn": "Buy-In",
+  "cashOut": "Cash Out",
   "status": "Status",
   "statusActive": "On Game",
   "statusSettling": "Settling",

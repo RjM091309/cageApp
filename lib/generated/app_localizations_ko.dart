@@ -229,6 +229,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get buyIn => '바이인';
 
   @override
+  String get cashOut => '캐시아웃';
+
+  @override
   String get status => '상태';
 
   @override

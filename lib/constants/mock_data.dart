@@ -1,10 +1,10 @@
 import '../models/types.dart';
 
 final mockOngoingGames = <OngoingGame>[
-  OngoingGame(id: '1', account: 'VIP-G881', buyIn: 250000, table: 'Bacc-01', gameType: 'LIVE', status: 'Active'),
-  OngoingGame(id: '2', account: 'AGENT-KRX', buyIn: 120000, table: 'Roulette-04', gameType: 'TELEBET', status: 'Active'),
-  OngoingGame(id: '3', account: 'VIP-J99', buyIn: 500000, table: 'Bacc-03', gameType: 'LIVE', status: 'Settling'),
-  OngoingGame(id: '4', account: 'VIP-A40', buyIn: 75000, table: 'Poker-02', gameType: 'LIVE', status: 'Active'),
+  OngoingGame(id: '1', account: 'VIP-G881', buyIn: 250000, cashOut: 0, table: 'Bacc-01', gameType: 'LIVE', status: 'Active'),
+  OngoingGame(id: '2', account: 'AGENT-KRX', buyIn: 120000, cashOut: 20000, table: 'Roulette-04', gameType: 'TELEBET', status: 'Active'),
+  OngoingGame(id: '3', account: 'VIP-J99', buyIn: 500000, cashOut: 480000, table: 'Bacc-03', gameType: 'LIVE', status: 'Settling'),
+  OngoingGame(id: '4', account: 'VIP-A40', buyIn: 75000, cashOut: 0, table: 'Poker-02', gameType: 'LIVE', status: 'Active'),
 ];
 
 final mockDailySettlement = <SettlementData>[

@@ -231,6 +231,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buyIn => 'Buy-In';
 
   @override
+  String get cashOut => 'Cash Out';
+
+  @override
   String get status => 'Status';
 
   @override
