@@ -93,5 +93,14 @@
   "noGamesToday": "No Games Today",
   "language": "Language",
   "english": "English",
-  "korean": "한국어"
+  "korean": "한국어",
+  "signIn": "Sign In",
+  "loginSubtitle": "Login to stay connected.",
+  "username": "Username",
+  "password": "Password",
+  "enterUsername": "Enter username",
+  "enterPassword": "Enter password",
+  "saveLogin": "Save login",
+  "errorEnterCredentials": "Enter username and password",
+  "errorInvalidCredentials": "Invalid username or password"
 }

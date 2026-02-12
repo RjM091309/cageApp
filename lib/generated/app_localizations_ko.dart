@@ -251,4 +251,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get korean => '한국어';
+
+  @override
+  String get signIn => '로그인';
+
+  @override
+  String get loginSubtitle => '연결 상태를 유지하기 위해 로그인하세요.';
+
+  @override
+  String get username => '사용자 이름';
+
+  @override
+  String get password => '비밀번호';
+
+  @override
+  String get enterUsername => '사용자 이름 입력';
+
+  @override
+  String get enterPassword => '비밀번호 입력';
+
+  @override
+  String get saveLogin => '로그인 저장';
+
+  @override
+  String get errorEnterCredentials => '사용자 이름과 비밀번호를 입력하세요';
+
+  @override
+  String get errorInvalidCredentials => '잘못된 사용자 이름 또는 비밀번호';
 }

@@ -577,6 +577,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'한국어'**
   String get korean;
+
+  /// No description provided for @signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get signIn;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login to stay connected.'**
+  String get loginSubtitle;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @enterUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter username'**
+  String get enterUsername;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get enterPassword;
+
+  /// No description provided for @saveLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Save login'**
+  String get saveLogin;
+
+  /// No description provided for @errorEnterCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter username and password'**
+  String get errorEnterCredentials;
+
+  /// No description provided for @errorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid username or password'**
+  String get errorInvalidCredentials;
 }
 
 class _AppLocalizationsDelegate

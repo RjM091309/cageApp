@@ -253,4 +253,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get korean => '한국어';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get loginSubtitle => 'Login to stay connected.';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enterUsername => 'Enter username';
+
+  @override
+  String get enterPassword => 'Enter password';
+
+  @override
+  String get saveLogin => 'Save login';
+
+  @override
+  String get errorEnterCredentials => 'Enter username and password';
+
+  @override
+  String get errorInvalidCredentials => 'Invalid username or password';
 }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import '../generated/app_localizations.dart';
+import '../main.dart';
+import '../widgets/drawer_panel.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.onLoginSuccess});
@@ -18,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _loading = false;
   bool _rememberMe = false;
+  bool _languageOpen = false;
   String? _errorMessage;
 
   @override
@@ -55,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
     if (username.isEmpty || password.isEmpty) {
       setState(() {
-        _errorMessage = 'Enter username and password';
+        _errorMessage = AppLocalizations.of(context).errorEnterCredentials;
         _loading = false;
       });
       return;
@@ -71,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.onLoginSuccess();
     } else {
       setState(() {
-        _errorMessage = 'Invalid username or password';
+        _errorMessage = AppLocalizations.of(context).errorInvalidCredentials;
         _loading = false;
       });
     }
@@ -80,19 +84,21 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: scaffoldGradient),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(gradient: scaffoldGradient),
+            child: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                       // Logo
                       Padding(
                         padding: const EdgeInsets.all(24),
@@ -107,31 +113,46 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                    
-                      // Sign In title + subtitle (align start)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20, bottom: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Sign In',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  letterSpacing: -0.5,
-                                ),
+                      // Sign In title + subtitle with language switcher
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20, bottom: 24, right: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context).signIn,
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    AppLocalizations.of(context).loginSubtitle,
+                                    style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Login to stay connected.',
-                                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                            ),
+                            Transform.translate(
+                              offset: const Offset(0, 6),
+                              child: IconButton(
+                                tooltip: AppLocalizations.of(context).language,
+                                onPressed: () => setState(() => _languageOpen = true),
+                                icon: const Icon(Icons.language, color: Colors.grey, size: 28),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                       Padding(
@@ -165,8 +186,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextFormField(
                               controller: _usernameController,
                               decoration: InputDecoration(
-                                labelText: 'Username',
-                                hintText: 'Enter username',
+                                labelText: AppLocalizations.of(context).username,
+                                hintText: AppLocalizations.of(context).enterUsername,
                                 prefixIcon: Icon(Icons.person_outline, size: 22, color: Colors.grey[500]),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                                 enabledBorder: OutlineInputBorder(
@@ -189,8 +210,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               controller: _passwordController,
                               obscureText: true,
                               decoration: InputDecoration(
-                                labelText: 'Password',
-                                hintText: 'Enter password',
+                                labelText: AppLocalizations.of(context).password,
+                                hintText: AppLocalizations.of(context).enterPassword,
                                 prefixIcon: Icon(Icons.lock_outline, size: 22, color: Colors.grey[500]),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                                 enabledBorder: OutlineInputBorder(
@@ -239,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ? null
                                           : () => setState(() => _rememberMe = !_rememberMe),
                                       child: Text(
-                                        'Save login',
+                                        AppLocalizations.of(context).saveLogin,
                                         style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                                       ),
                                     ),
@@ -264,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 width: 22,
                                                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                               )
-                                            : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                                            : Text(AppLocalizations.of(context).signIn, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                                       ),
                                     ),
                                   ),
@@ -279,6 +300,77 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+          ),
+        ),
+          ),
+          if (_languageOpen)
+            Positioned.fill(
+              child: DrawerPanel(
+                title: AppLocalizations.of(context).language,
+                onClose: () => setState(() => _languageOpen = false),
+                child: Builder(
+                  builder: (context) {
+                    final l10n = AppLocalizations.of(context);
+                    final scope = AppLocaleScope.of(context);
+                    final current = scope.locale?.languageCode;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _languageOption(
+                          context,
+                          flag: '🇺🇸',
+                          label: l10n.english,
+                          isSelected: current == 'en',
+                          onTap: () {
+                            scope.setLocale(const Locale('en'));
+                            setState(() => _languageOpen = false);
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _languageOption(
+                          context,
+                          flag: '🇰🇷',
+                          label: l10n.korean,
+                          isSelected: current == 'ko',
+                          onTap: () {
+                            scope.setLocale(const Locale('ko'));
+                            setState(() => _languageOpen = false);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _languageOption(BuildContext context, {required String flag, required String label, required bool isSelected, required VoidCallback onTap}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: isSelected ? primaryIndigo : borderColor),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.check, size: 20, color: isSelected ? primaryIndigo : Colors.grey),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isSelected ? primaryIndigo : Colors.white)),
+              ),
+              const SizedBox(width: 12),
+              Text(flag, style: const TextStyle(fontSize: 24, height: 1.2)),
+            ],
           ),
         ),
       ),
