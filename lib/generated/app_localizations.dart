@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Infinity Cage X'**
+  /// **'INF Cage'**
   String get appTitle;
 
   /// No description provided for @executive.
@@ -116,17 +116,17 @@ abstract class AppLocalizations {
   /// **'MAIN MENU'**
   String get mainMenu;
 
-  /// No description provided for @navRealTime.
+  /// No description provided for @navGenInfo.
   ///
   /// In en, this message translates to:
-  /// **'Real-Time'**
-  String get navRealTime;
+  /// **'Gen Info'**
+  String get navGenInfo;
 
-  /// No description provided for @navDaily.
+  /// No description provided for @navWeekly.
   ///
   /// In en, this message translates to:
-  /// **'Daily'**
-  String get navDaily;
+  /// **'Weekly'**
+  String get navWeekly;
 
   /// No description provided for @navMonthly.
   ///
@@ -140,11 +140,11 @@ abstract class AppLocalizations {
   /// **'Marker'**
   String get navMarker;
 
-  /// No description provided for @navRanking.
+  /// No description provided for @navPerform.
   ///
   /// In en, this message translates to:
-  /// **'Ranking'**
-  String get navRanking;
+  /// **'Perform'**
+  String get navPerform;
 
   /// No description provided for @executiveBoss.
   ///
@@ -275,7 +275,7 @@ abstract class AppLocalizations {
   /// No description provided for @monthlyAccumulatedWinLoss.
   ///
   /// In en, this message translates to:
-  /// **'Monthly Accumulated Win Loss'**
+  /// **'Monthly W/L'**
   String get monthlyAccumulatedWinLoss;
 
   /// No description provided for @trendVsLastMonth.
@@ -287,7 +287,7 @@ abstract class AppLocalizations {
   /// No description provided for @topMonthlyCommission.
   ///
   /// In en, this message translates to:
-  /// **'Top Monthly Commission'**
+  /// **'Monthly Commission'**
   String get topMonthlyCommission;
 
   /// No description provided for @rankAgentDragon.
@@ -299,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @accumulatedExpenses.
   ///
   /// In en, this message translates to:
-  /// **'Accumulated Expenses'**
+  /// **'Monthly Expenses'**
   String get accumulatedExpenses;
 
   /// No description provided for @mtdExpenditure.
@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @gamesRolling.
   ///
   /// In en, this message translates to:
-  /// **'Games (Rolling)'**
+  /// **'Monthly Rolling'**
   String get gamesRolling;
 
   /// No description provided for @totalRolling.
@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @monthlyAccumulatedRollingCasino.
   ///
   /// In en, this message translates to:
-  /// **'Monthly Accumulated Rolling (Casino)'**
+  /// **'Monthly Casino Rolling'**
   String get monthlyAccumulatedRollingCasino;
 
   /// No description provided for @monthJanuary.
@@ -359,49 +359,49 @@ abstract class AppLocalizations {
   /// No description provided for @totalBuyIn.
   ///
   /// In en, this message translates to:
-  /// **'Total Buy-In'**
+  /// **'Buy-in'**
   String get totalBuyIn;
 
   /// No description provided for @avgRolling.
   ///
   /// In en, this message translates to:
-  /// **'Avg Rolling'**
+  /// **'Rolling'**
   String get avgRolling;
 
   /// No description provided for @winRate.
   ///
   /// In en, this message translates to:
-  /// **'Win Rate'**
+  /// **'W/L'**
   String get winRate;
 
   /// No description provided for @totalGames.
   ///
   /// In en, this message translates to:
-  /// **'Total Games'**
+  /// **'Game'**
   String get totalGames;
 
   /// No description provided for @numberOfGamesWinLoss.
   ///
   /// In en, this message translates to:
-  /// **'Number of Games & Win/Loss'**
+  /// **'Weekly - W/L'**
   String get numberOfGamesWinLoss;
 
   /// No description provided for @winLossTrend.
   ///
   /// In en, this message translates to:
-  /// **'Win / Loss Trend'**
+  /// **'Weekly - W/L'**
   String get winLossTrend;
 
   /// No description provided for @dailyCommission.
   ///
   /// In en, this message translates to:
-  /// **'Daily Commission'**
+  /// **'Weekly - Commission'**
   String get dailyCommission;
 
   /// No description provided for @junketExpenses.
   ///
   /// In en, this message translates to:
-  /// **'Junket Expenses'**
+  /// **'Weekly – Expenses'**
   String get junketExpenses;
 
   /// No description provided for @realTimeMarker.
@@ -431,7 +431,7 @@ abstract class AppLocalizations {
   /// No description provided for @guestAgentRanking.
   ///
   /// In en, this message translates to:
-  /// **'GUEST & AGENT RANKING'**
+  /// **'Guest and Agent Monthly Performance'**
   String get guestAgentRanking;
 
   /// No description provided for @monthlyPerformanceReport.
@@ -473,7 +473,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalChips.
   ///
   /// In en, this message translates to:
-  /// **'Total Chips'**
+  /// **'Total Chip'**
   String get totalChips;
 
   /// No description provided for @cashBalance.
@@ -485,25 +485,25 @@ abstract class AppLocalizations {
   /// No description provided for @guestBalance.
   ///
   /// In en, this message translates to:
-  /// **'Guest Balance'**
+  /// **'House Balance'**
   String get guestBalance;
 
   /// No description provided for @netJunketMoney.
   ///
   /// In en, this message translates to:
-  /// **'Net Junket Money'**
+  /// **'Net Junket Cash'**
   String get netJunketMoney;
 
   /// No description provided for @netJunketCash.
   ///
   /// In en, this message translates to:
-  /// **'Net Junket Cash'**
+  /// **'Net Junket Money'**
   String get netJunketCash;
 
   /// No description provided for @ongoingGames.
   ///
   /// In en, this message translates to:
-  /// **'Ongoing Games'**
+  /// **'On Going Game'**
   String get ongoingGames;
 
   /// No description provided for @live.
@@ -527,19 +527,19 @@ abstract class AppLocalizations {
   /// No description provided for @gameType.
   ///
   /// In en, this message translates to:
-  /// **'Game type'**
+  /// **'Game Type'**
   String get gameType;
 
   /// No description provided for @buyIn.
   ///
   /// In en, this message translates to:
-  /// **'Buy-In'**
+  /// **'Buy-in'**
   String get buyIn;
 
   /// No description provided for @cashOut.
   ///
   /// In en, this message translates to:
-  /// **'Cash Out'**
+  /// **'Cash-out'**
   String get cashOut;
 
   /// No description provided for @status.

@@ -18,19 +18,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mainMenu => '메인 메뉴';
 
   @override
-  String get navRealTime => '실시간';
+  String get navGenInfo => '종합정보';
 
   @override
-  String get navDaily => '일별';
+  String get navWeekly => '주간 통계';
 
   @override
-  String get navMonthly => '월별';
+  String get navMonthly => '월간 통계';
 
   @override
   String get navMarker => '마커';
 
   @override
-  String get navRanking => '순위';
+  String get navPerform => '실적';
 
   @override
   String get executiveBoss => '임원 보스';
@@ -98,7 +98,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get monthlyAccumulatedWinLoss => '월별 누적 손익';
+  String get monthlyAccumulatedWinLoss => '월 누적 윈/로스';
 
   @override
   String trendVsLastMonth(String percent) {
@@ -106,19 +106,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get topMonthlyCommission => '월간 수수료 1위';
+  String get topMonthlyCommission => '월 누적 커미션';
 
   @override
   String get rankAgentDragon => '1위 - 에이전트 드래곤';
 
   @override
-  String get accumulatedExpenses => '누적 경비';
+  String get accumulatedExpenses => '월 누적 지출';
 
   @override
   String get mtdExpenditure => '당월 경비';
 
   @override
-  String get gamesRolling => '게임 (롤링)';
+  String get gamesRolling => '월 누적 롤링';
 
   @override
   String get totalRolling => '총 롤링';
@@ -127,7 +127,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get casinoIntegration => '카지노 연동';
 
   @override
-  String get monthlyAccumulatedRollingCasino => '월별 누적 롤링 (카지노)';
+  String get monthlyAccumulatedRollingCasino => '카지노 롤링';
 
   @override
   String get monthJanuary => '1월';
@@ -142,28 +142,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get monthApril => '4월';
 
   @override
-  String get totalBuyIn => '총 바이인';
+  String get totalBuyIn => '바이인';
 
   @override
-  String get avgRolling => '평균 롤링';
+  String get avgRolling => '롤링';
 
   @override
-  String get winRate => '승률';
+  String get winRate => '윈/로스';
 
   @override
-  String get totalGames => '총 게임';
+  String get totalGames => '게임';
 
   @override
-  String get numberOfGamesWinLoss => '게임 수 및 손익';
+  String get numberOfGamesWinLoss => '주간 통계';
 
   @override
-  String get winLossTrend => '손익 추이';
+  String get winLossTrend => '주간 통계';
 
   @override
-  String get dailyCommission => '일별 수수료';
+  String get dailyCommission => '주간 통계';
 
   @override
-  String get junketExpenses => '준켓 경비';
+  String get junketExpenses => '정캣 지출';
 
   @override
   String get realTimeMarker => '실시간 마커';
@@ -178,7 +178,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get utilization => '사용률';
 
   @override
-  String get guestAgentRanking => '게스트 및 에이전트 순위';
+  String get guestAgentRanking => '게스트 및 에이전트 월간 실적';
 
   @override
   String get monthlyPerformanceReport => '월별 누적 실적 보고서';
@@ -199,22 +199,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get winRatio => '승률';
 
   @override
-  String get totalChips => '총 칩';
+  String get totalChips => '토탈칩';
 
   @override
-  String get cashBalance => '현금 잔액';
+  String get cashBalance => '캐시 발렌스';
 
   @override
-  String get guestBalance => '게스트 잔액';
+  String get guestBalance => '하우스 발렌스';
 
   @override
-  String get netJunketMoney => '순 준켓 금액';
+  String get netJunketMoney => '순 정캣 현금';
 
   @override
-  String get netJunketCash => '순 준켓 현금';
+  String get netJunketCash => '순 정캣 자산';
 
   @override
-  String get ongoingGames => '진행 중인 게임';
+  String get ongoingGames => '진행중인 게임';
 
   @override
   String get live => '라이브';
@@ -226,7 +226,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get table => '테이블';
 
   @override
-  String get gameType => '게임 종류';
+  String get gameType => '게임타입';
 
   @override
   String get buyIn => '바이인';

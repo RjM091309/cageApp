@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Infinity Cage X';
+  String get appTitle => 'INF Cage';
 
   @override
   String get executive => 'EXECUTIVE';
@@ -18,10 +18,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mainMenu => 'MAIN MENU';
 
   @override
-  String get navRealTime => 'Real-Time';
+  String get navGenInfo => 'Gen Info';
 
   @override
-  String get navDaily => 'Daily';
+  String get navWeekly => 'Weekly';
 
   @override
   String get navMonthly => 'Monthly';
@@ -30,7 +30,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMarker => 'Marker';
 
   @override
-  String get navRanking => 'Ranking';
+  String get navPerform => 'Perform';
 
   @override
   String get executiveBoss => 'Executive Boss';
@@ -98,7 +98,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get monthlyAccumulatedWinLoss => 'Monthly Accumulated Win Loss';
+  String get monthlyAccumulatedWinLoss => 'Monthly W/L';
 
   @override
   String trendVsLastMonth(String percent) {
@@ -106,19 +106,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get topMonthlyCommission => 'Top Monthly Commission';
+  String get topMonthlyCommission => 'Monthly Commission';
 
   @override
   String get rankAgentDragon => 'Rank #1 - Agent Dragon';
 
   @override
-  String get accumulatedExpenses => 'Accumulated Expenses';
+  String get accumulatedExpenses => 'Monthly Expenses';
 
   @override
   String get mtdExpenditure => 'MTD Expenditure';
 
   @override
-  String get gamesRolling => 'Games (Rolling)';
+  String get gamesRolling => 'Monthly Rolling';
 
   @override
   String get totalRolling => 'Total Rolling';
@@ -127,8 +127,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get casinoIntegration => 'Casino Integration';
 
   @override
-  String get monthlyAccumulatedRollingCasino =>
-      'Monthly Accumulated Rolling (Casino)';
+  String get monthlyAccumulatedRollingCasino => 'Monthly Casino Rolling';
 
   @override
   String get monthJanuary => 'January';
@@ -143,28 +142,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthApril => 'April';
 
   @override
-  String get totalBuyIn => 'Total Buy-In';
+  String get totalBuyIn => 'Buy-in';
 
   @override
-  String get avgRolling => 'Avg Rolling';
+  String get avgRolling => 'Rolling';
 
   @override
-  String get winRate => 'Win Rate';
+  String get winRate => 'W/L';
 
   @override
-  String get totalGames => 'Total Games';
+  String get totalGames => 'Game';
 
   @override
-  String get numberOfGamesWinLoss => 'Number of Games & Win/Loss';
+  String get numberOfGamesWinLoss => 'Weekly - W/L';
 
   @override
-  String get winLossTrend => 'Win / Loss Trend';
+  String get winLossTrend => 'Weekly - W/L';
 
   @override
-  String get dailyCommission => 'Daily Commission';
+  String get dailyCommission => 'Weekly - Commission';
 
   @override
-  String get junketExpenses => 'Junket Expenses';
+  String get junketExpenses => 'Weekly – Expenses';
 
   @override
   String get realTimeMarker => 'Real-Time Marker';
@@ -179,7 +178,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get utilization => 'UTILIZATION';
 
   @override
-  String get guestAgentRanking => 'GUEST & AGENT RANKING';
+  String get guestAgentRanking => 'Guest and Agent Monthly Performance';
 
   @override
   String get monthlyPerformanceReport =>
@@ -201,22 +200,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get winRatio => 'WIN RATIO';
 
   @override
-  String get totalChips => 'Total Chips';
+  String get totalChips => 'Total Chip';
 
   @override
   String get cashBalance => 'Cash Balance';
 
   @override
-  String get guestBalance => 'Guest Balance';
+  String get guestBalance => 'House Balance';
 
   @override
-  String get netJunketMoney => 'Net Junket Money';
+  String get netJunketMoney => 'Net Junket Cash';
 
   @override
-  String get netJunketCash => 'Net Junket Cash';
+  String get netJunketCash => 'Net Junket Money';
 
   @override
-  String get ongoingGames => 'Ongoing Games';
+  String get ongoingGames => 'On Going Game';
 
   @override
   String get live => 'LIVE';
@@ -228,13 +227,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get table => 'Table';
 
   @override
-  String get gameType => 'Game type';
+  String get gameType => 'Game Type';
 
   @override
-  String get buyIn => 'Buy-In';
+  String get buyIn => 'Buy-in';
 
   @override
-  String get cashOut => 'Cash Out';
+  String get cashOut => 'Cash-out';
 
   @override
   String get status => 'Status';

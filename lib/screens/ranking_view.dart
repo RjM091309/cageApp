@@ -174,7 +174,6 @@ class _RankingViewState extends State<RankingView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(l10n.guestAgentRanking, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5, fontStyle: FontStyle.italic)),
-            Text(l10n.monthlyPerformanceReport, style: TextStyle(fontSize: 12, color: Colors.grey[400])),
           ],
         ),
       ],

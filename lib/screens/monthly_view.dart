@@ -168,8 +168,7 @@ class _MonthlyViewState extends State<MonthlyView> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.casinoIntegration, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                      Text(l10n.monthlyAccumulatedRollingCasino, style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+                      Text(l10n.monthlyAccumulatedRollingCasino, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                     ],
                   ),
                 ],

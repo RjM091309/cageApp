@@ -21,11 +21,11 @@ import 'ranking_view.dart';
 List<(ViewType, String, IconData)> navItems(BuildContext context) {
   final l10n = AppLocalizations.of(context);
   return [
-    (ViewType.realTime, l10n.navRealTime, Icons.show_chart),
-    (ViewType.daily, l10n.navDaily, Icons.calendar_today),
+    (ViewType.realTime, l10n.navGenInfo, Icons.show_chart),
+    (ViewType.daily, l10n.navWeekly, Icons.calendar_today),
     (ViewType.monthly, l10n.navMonthly, Icons.bar_chart),
     (ViewType.marker, l10n.navMarker, Icons.description),
-    (ViewType.ranking, l10n.navRanking, Icons.emoji_events),
+    (ViewType.ranking, l10n.navPerform, Icons.emoji_events),
   ];
 }
 
