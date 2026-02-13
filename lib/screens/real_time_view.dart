@@ -299,6 +299,117 @@ class _RealTimeViewState extends State<RealTimeView> {
     );
   }
 
+  Widget _buildMobileGameCard(AppLocalizations l10n, OngoingGame game) {
+    final statusLabel = game.status == 'Active' ? l10n.statusActive : l10n.statusSettling;
+    final nameMatch = RegExp(r'^(.+?)\s*\(([^)]+)\)\s*$').firstMatch(game.account);
+    final displayName = nameMatch != null ? nameMatch.group(1)!.trim() : game.account;
+    final codeSubtitle = nameMatch != null ? nameMatch.group(2)!.trim() : null;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Trophy/Status Icon
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: game.status == 'Active' ? emeraldAccent.withValues(alpha: 0.2) : amberAccent.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              game.status == 'Active' ? Icons.emoji_events : Icons.pending,
+              color: game.status == 'Active' ? emeraldAccent : amberAccent,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Name and stats column
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name and Status row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(displayName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: game.status == 'Active' ? emeraldAccent.withValues(alpha: 0.2) : amberAccent.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: game.status == 'Active' ? emeraldAccent : amberAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                // Code and Game Type
+                Row(
+                  children: [
+                    if (codeSubtitle != null) ...[
+                      Text(codeSubtitle, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.w500)),
+                      const SizedBox(width: 6),
+                      Text('•', style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(game.gameType, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.w500)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Buy In and Cash Out row
+                Row(
+                  children: [
+                    // Buy In
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.buyIn.toUpperCase(), style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 0.5)),
+                          const SizedBox(height: 3),
+                          Text(_fmt.format(game.buyIn), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: primaryIndigo)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Cash Out
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(l10n.cashOut.toUpperCase(), style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 0.5)),
+                          const SizedBox(height: 3),
+                          Text(_fmt.format(game.cashOut), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: amberAccent)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -390,6 +501,28 @@ class _RealTimeViewState extends State<RealTimeView> {
                 builder: (context, c) {
                   final isMobile = c.maxWidth < 600;
                   final games = _data.ongoingGames;
+                  
+                  if (games.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                      child: Center(
+                        child: Text(
+                          l10n.noGamesToday,
+                          style: TextStyle(fontSize: 15, color: Colors.grey[500], fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    );
+                  }
+                  
+                  if (isMobile) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: games.map((g) => _buildMobileGameCard(l10n, g)).toList(),
+                      ),
+                    );
+                  }
+                  
                   final table = Table(
                     columnWidths: const {
                       0: FlexColumnWidth(1.5),
@@ -441,33 +574,6 @@ class _RealTimeViewState extends State<RealTimeView> {
                       }),
                     ],
                   );
-                  if (games.isEmpty) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        table,
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                          child: Center(
-                            child: Text(
-                              l10n.noGamesToday,
-                              style: TextStyle(fontSize: 15, color: Colors.grey[500], fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  if (isMobile) {
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SizedBox(
-                        width: 420,
-                        child: table,
-                      ),
-                    );
-                  }
                   return table;
                 },
               ),
