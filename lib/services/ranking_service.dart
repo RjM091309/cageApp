@@ -22,7 +22,6 @@ class RankingService {
   /// Fetches one page of guest/agent ranking.
   /// [limit] default 20, [offset] for pagination. Returns list and total count.
   Future<RankingPageResult> fetch({int? year, int? month, int limit = _pageSize, int offset = 0}) async {
-    await Future.delayed(offset == 0 ? const Duration(milliseconds: 500) : Duration.zero);
     try {
       final url = rankingApiUrl(year: year, month: month, limit: limit, offset: offset);
       final res = await http.get(Uri.parse(url));

@@ -11,7 +11,6 @@ class MarkerService {
 
   /// Fetches marker/credit list (guests/agents with non-zero balance).
   Future<List<MarkerEntry>> fetch() async {
-    await Future.delayed(const Duration(milliseconds: 500));
     try {
       final res = await http.get(Uri.parse(markerApiUrl));
       if (res.statusCode != 200) return [];

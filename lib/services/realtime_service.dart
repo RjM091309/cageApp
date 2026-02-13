@@ -17,7 +17,6 @@ class RealtimeService {
   Stream<RealtimeData> get realtimeStream => _realtimeController.stream;
 
   Future<RealtimeData> fetchRealtime() async {
-    await Future.delayed(const Duration(milliseconds: 500));
     try {
       final res = await http.get(Uri.parse(realtimeApiUrl));
       if (res.statusCode != 200) return RealtimeData.empty();

@@ -85,7 +85,6 @@ class DailySettlementService {
     DateTime? end,
     int weekOffset = 0,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 500));
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     DateTime startDate;

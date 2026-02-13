@@ -65,7 +65,6 @@ class MonthlyService {
 
   /// Fetches monthly accumulated for current month and last 4 months for casino chart.
   Future<MonthlyResult> fetch({int? year, int? month}) async {
-    await Future.delayed(const Duration(milliseconds: 500));
     final now = DateTime.now();
     final y = year ?? now.year;
     final m = month ?? now.month;

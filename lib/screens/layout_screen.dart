@@ -150,8 +150,8 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
       final index = _indexOfView(view);
       _pageController.animateToPage(
         index,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
+        duration: const Duration(milliseconds: 380),
+        curve: Curves.easeInOutCubic,
       );
     } else {
       _contentTransitionController.forward(from: 0);
@@ -188,6 +188,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
     }
     return PageView(
       controller: _pageController,
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       onPageChanged: (index) {
         if (index >= 0 && index < _viewOrder.length) {
           setState(() => _activeView = _viewOrder[index]);
