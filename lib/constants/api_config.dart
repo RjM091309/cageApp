@@ -3,7 +3,7 @@
 /// - Server (IP): http://45.32.103.210:4005
 /// - Local dev: http://localhost:4005 or http://192.168.x.x:4005
 
-const String apiBaseUrl = 'http://192.168.110.132:4005';
+const String apiBaseUrl = 'https://infinitycage.3core21.com';
 
 String get loginApiUrl => '$apiBaseUrl/api/auth/login';
 

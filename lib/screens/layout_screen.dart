@@ -38,11 +38,15 @@ class LayoutScreen extends StatefulWidget {
   State<LayoutScreen> createState() => _LayoutScreenState();
 }
 
+/// Order of views in bottom nav and PageView (portrait).
+const _viewOrder = [ViewType.realTime, ViewType.daily, ViewType.monthly, ViewType.marker, ViewType.ranking];
+
 class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderStateMixin {
   ViewType _activeView = ViewType.realTime;
   /// When null = no transition. When set, we're animating from _previousView to _activeView.
   ViewType? _previousView;
   late final AnimationController _contentTransitionController;
+  late final PageController _pageController;
   late Widget _cachedContent;
   Widget? _outgoingContent;
   bool _notificationOpen = false;
@@ -71,6 +75,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
     };
     // Load notifications on start so red dot shows for unread without opening panel first
     _loadNotifications();
+    _pageController = PageController(initialPage: 0);
     _contentTransitionController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -93,8 +98,14 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
     NotificationService.onNotificationsChanged = null;
     _serverStatusSub?.cancel();
     ServerStatusService.instance.stop();
+    _pageController.dispose();
     _contentTransitionController.dispose();
     super.dispose();
+  }
+
+  int _indexOfView(ViewType v) {
+    final i = _viewOrder.indexOf(v);
+    return i >= 0 ? i : 0;
   }
 
   Future<void> _loadNotifications() async {
@@ -126,7 +137,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
     }
   }
 
-  void _setActiveView(ViewType view) {
+  void _setActiveView(ViewType view, {bool animatePage = false}) {
     if (view == _activeView) return;
     final oldView = _activeView;
     setState(() {
@@ -135,7 +146,16 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
       _activeView = view;
       _cachedContent = _buildView(view);
     });
-    _contentTransitionController.forward(from: 0);
+    if (animatePage && _pageController.hasClients) {
+      final index = _indexOfView(view);
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _contentTransitionController.forward(from: 0);
+    }
   }
 
   Widget _buildView(ViewType view) {
@@ -151,6 +171,56 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
       case ViewType.ranking:
         return const RankingView();
     }
+  }
+
+  Widget _buildPortraitPageView(BuildContext context) {
+    // Sync page to _activeView when e.g. rotating from landscape
+    if (_pageController.hasClients) {
+      final currentPage = (_pageController.page ?? 0).round();
+      final wantPage = _indexOfView(_activeView);
+      if (currentPage != wantPage) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _pageController.hasClients) {
+            _pageController.jumpToPage(_indexOfView(_activeView));
+          }
+        });
+      }
+    }
+    return PageView(
+      controller: _pageController,
+      onPageChanged: (index) {
+        if (index >= 0 && index < _viewOrder.length) {
+          setState(() => _activeView = _viewOrder[index]);
+        }
+      },
+      children: _viewOrder.map((v) => _buildPortraitPage(context, v)).toList(),
+    );
+  }
+
+  /// One page in the portrait PageView carousel.
+  Widget _buildPortraitPage(BuildContext context, ViewType view) {
+    const padding = EdgeInsets.all(24);
+    const maxWidth = BoxConstraints(maxWidth: 1280);
+    final content = ActiveViewScope(
+      activeView: view,
+      child: _buildView(view),
+    );
+    final wrapped = Center(
+      child: ConstrainedBox(
+        constraints: maxWidth,
+        child: content,
+      ),
+    );
+    if (view == ViewType.ranking) {
+      return Padding(
+        padding: padding,
+        child: wrapped,
+      );
+    }
+    return SingleChildScrollView(
+      padding: padding,
+      child: wrapped,
+    );
   }
 
   String _viewLabel(BuildContext context) {
@@ -213,31 +283,33 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
                     children: [
                       _buildHeader(context, isWide),
                       Expanded(
-                        child: _activeView == ViewType.ranking
-                            ? Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Center(
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(maxWidth: 1280),
-                                    child: ActiveViewScope(
-                                      activeView: _activeView,
-                                      child: _buildTransitionContent(),
+                        child: !isWide
+                            ? _buildPortraitPageView(context)
+                            : _activeView == ViewType.ranking
+                                ? Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Center(
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(maxWidth: 1280),
+                                        child: ActiveViewScope(
+                                          activeView: _activeView,
+                                          child: _buildTransitionContent(),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : SingleChildScrollView(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Center(
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(maxWidth: 1280),
+                                        child: ActiveViewScope(
+                                          activeView: _activeView,
+                                          child: _buildTransitionContent(),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                            : SingleChildScrollView(
-                                padding: const EdgeInsets.all(24),
-                                child: Center(
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(maxWidth: 1280),
-                                    child: ActiveViewScope(
-                                      activeView: _activeView,
-                                      child: _buildTransitionContent(),
-                                    ),
-                                  ),
-                                ),
-                              ),
                       ),
                       if (!isWide) const SizedBox(height: 80),
                     ],
@@ -810,7 +882,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
           children: navItems(context).map((e) {
             final isActive = _activeView == e.$1;
             return InkWell(
-              onTap: () => _setActiveView(e.$1),
+              onTap: () => _setActiveView(e.$1, animatePage: true),
               borderRadius: BorderRadius.circular(12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

@@ -57,8 +57,29 @@ class DailySettlementService {
     }
   }
 
-  /// Fetches chart data for the week (Monday–Sunday), same as dashboard win/loss.
-  /// Default: this week (Mon–Sun). Optional [weekOffset]: 0 = this week, -1 = last week, etc.
+  static String _dateLabel(String yyyyMmDd, DateTime today, List<String> weekdays) {
+    try {
+      final parts = yyyyMmDd.split('-');
+      if (parts.length != 3) return yyyyMmDd;
+      final y = int.tryParse(parts[0]) ?? 0;
+      final m = int.tryParse(parts[1]) ?? 1; // Dart DateTime month 1-12
+      final d = int.tryParse(parts[2]) ?? 1;
+      final dt = DateTime(y, m, d);
+      if (dt.year == today.year && dt.month == today.month && dt.day == today.day) return 'Today';
+      return weekdays[dt.weekday - 1];
+    } catch (_) {
+      return yyyyMmDd;
+    }
+  }
+
+  static List<String> _toStringList(dynamic list) {
+    if (list == null || list is! List) return [];
+    return list.map((e) => e?.toString() ?? '').toList();
+  }
+
+  /// Fetches chart data for the last 7 days (rolling window ending today).
+  /// So Sat/Sun shown are previous weekend with real data; "Today" stays last.
+  /// Optional [start]/[end] override the range.
   Future<DailySettlementResult> fetch({
     DateTime? start,
     DateTime? end,
@@ -73,11 +94,9 @@ class DailySettlementService {
       startDate = start;
       endDate = end;
     } else {
-      // Week = Monday to Sunday (same as dashboard getDateRange)
-      // today.weekday: 1=Mon .. 7=Sun → Monday of this week = today - (weekday - 1)
-      final mondayOfThisWeek = today.subtract(Duration(days: today.weekday - 1));
-      startDate = mondayOfThisWeek.add(Duration(days: weekOffset * 7));
-      endDate = startDate.add(const Duration(days: 6));
+      // Last 7 days (rolling): today-6 .. today. So previous Sat/Sun have real data.
+      endDate = today.add(Duration(days: weekOffset * 7));
+      startDate = endDate.subtract(const Duration(days: 6));
     }
     final startStr = _toYYYYMMDD(startDate);
     final endStr = _toYYYYMMDD(endDate);
@@ -91,6 +110,7 @@ class DailySettlementService {
       final chart = json['chart'];
       if (chart == null || chart is! Map) return DailySettlementResult.empty();
 
+      final labels = _toStringList(chart['labels']);
       final numGames = _toIntList(chart['number_of_games']);
       final buyIn = _toIntList(chart['buy_in']);
       final gameRolling = _toIntList(chart['game_rolling']);
@@ -98,17 +118,17 @@ class DailySettlementService {
       final commission = _toIntList(chart['commission']);
       final junketExpenses = _toIntList(chart['junket_expenses']);
 
-      // Fixed order: Mon, Tue, Wed, Thu, Fri, Sat, Sun (same as dashboard). API returns [Mon..Sun] by index.
-      // Map API[i] to weekday (i+1); show "Today" when (i+1) == today.weekday.
+      // API returns one entry per day in range (oldest first). Label each by weekday or "Today".
       const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const dayCount = 7;
       final days = <SettlementData>[];
-      for (int i = 0; i < dayCount; i++) {
-        final weekday = i + 1; // 1=Mon .. 7=Sun
-        final dateLabel = (weekday == today.weekday) ? 'Today' : weekdays[i];
+      final count = numGames.length;
+      for (int i = 0; i < count; i++) {
+        final dateLabel = i < labels.length
+            ? _dateLabel(labels[i], today, weekdays)
+            : (i == count - 1 ? 'Today' : weekdays[i % 7]);
         days.add(SettlementData(
           date: dateLabel,
-          numGames: i < numGames.length ? numGames[i] : 0,
+          numGames: numGames[i],
           buyIn: i < buyIn.length ? buyIn[i] : 0,
           rolling: i < gameRolling.length ? gameRolling[i] : 0,
           winLoss: i < winLoss.length ? winLoss[i] : 0,
@@ -117,14 +137,13 @@ class DailySettlementService {
         ));
       }
 
-      // Card metrics: today only (index = today's offset in range; if not in range, use 0)
-      final todayInRange = !today.isBefore(startDate) && !today.isAfter(endDate);
-      final todayIdx = todayInRange ? today.difference(startDate).inDays : -1;
-      final hasToday = todayIdx >= 0 && todayIdx < days.length;
-      final int totalBuyIn = hasToday ? days[todayIdx].buyIn : 0;
-      final int totalGames = hasToday ? days[todayIdx].numGames : 0;
-      final int totalRolling = hasToday ? days[todayIdx].rolling : 0;
-      final int totalWL = hasToday ? days[todayIdx].winLoss : 0;
+      // Card metrics: last day in range is "today" when range ends today
+      final lastIdx = days.isEmpty ? -1 : days.length - 1;
+      final hasToday = lastIdx >= 0 && endDate == today;
+      final int totalBuyIn = hasToday ? days[lastIdx].buyIn : 0;
+      final int totalGames = hasToday ? days[lastIdx].numGames : 0;
+      final int totalRolling = hasToday ? days[lastIdx].rolling : 0;
+      final int totalWL = hasToday ? days[lastIdx].winLoss : 0;
       final double avgRolling = totalGames > 0 ? totalRolling / totalGames : 0.0;
       final double winRatePercent = totalBuyIn > 0 ? (totalWL / totalBuyIn) * 100 : 0.0;
 
