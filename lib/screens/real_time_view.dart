@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import '../generated/app_localizations.dart';
 import '../models/realtime_data.dart';
 import '../services/realtime_service.dart';
-import '../services/notification_service.dart';
 import '../models/types.dart';
 import '../theme/app_theme.dart';
 import '../widgets/active_view_scope.dart';
@@ -14,30 +13,6 @@ import '../widgets/skeleton_box.dart';
 import '../widgets/stat_card.dart';
 
 final _fmt = NumberFormat.currency(locale: 'en_PH', symbol: '₱', decimalDigits: 0);
-final _dateTimeFmt = DateFormat('MMM d, yyyy h:mm a');
-
-/// Formats encoded_dt for display in device local time, e.g. "Feb 12, 2026 2:14 PM".
-/// Backend may send UTC without "Z"; we treat that as UTC so it displays correctly in Philippines/local.
-String _formatTableDateTime(String raw) {
-  if (raw.isEmpty) return raw;
-  final dt = _parseDateTimeAsUtcOrLocal(raw);
-  if (dt == null) return raw;
-  return _dateTimeFmt.format(dt);
-}
-
-/// Parses API datetime. If string has no timezone (no Z, no offset), treats it as UTC (server/DB convention).
-DateTime? _parseDateTimeAsUtcOrLocal(String raw) {
-  final s = raw.trim();
-  if (s.isEmpty) return null;
-  final withZ = DateTime.tryParse(s);
-  if (withZ != null && (s.endsWith('Z') || s.contains('+') || s.contains('-'))) return withZ.toLocal();
-  final noTz = DateTime.tryParse(s);
-  if (noTz != null) {
-    if (noTz.isUtc) return noTz.toLocal();
-    return DateTime.utc(noTz.year, noTz.month, noTz.day, noTz.hour, noTz.minute, noTz.second, noTz.millisecond).toLocal();
-  }
-  return null;
-}
 
 Widget _skeletonGameCard() {
     return Container(
@@ -83,7 +58,10 @@ Widget _skeletonGameCard() {
   }
 
 class RealTimeView extends StatefulWidget {
-  const RealTimeView({super.key});
+  const RealTimeView({super.key, this.onPollTick});
+
+  /// Called every time the realtime poll runs (same 3s). Use to sync e.g. notification fetch so toast/red dot update with ongoing games.
+  final VoidCallback? onPollTick;
 
   @override
   State<RealTimeView> createState() => _RealTimeViewState();
@@ -99,14 +77,12 @@ class _RealTimeViewState extends State<RealTimeView> {
   void initState() {
     super.initState();
     _load();
-    // HTTP polling on all platforms (backend has REST /api/realtime only; no Socket.IO emit)
-    // Poll every 3s: always check for new games/changes and create notifications (any tab).
-    // Only refresh UI when on Real Time tab to avoid delay when user is on Monthly/Marker etc.
+    // HTTP polling: refresh realtime data for UI. Notifications are created by server-side job only; app just fetches (GET).
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       if (!mounted) return;
+      widget.onPollTick?.call();
       _service.fetchRealtime().then((data) {
         if (!mounted) return;
-        _notifyNewOngoingGamesIfAny(data);
         setState(() => _data = data);
       });
     });
@@ -121,88 +97,6 @@ class _RealTimeViewState extends State<RealTimeView> {
       _data = data;
       _loading = false;
     });
-  }
-
-  /// Dedupe key -> last sent time (shared across instances to avoid duplicate notifications).
-  static final Map<String, DateTime> _lastBuyInNotify = {};
-  static final Map<String, DateTime> _lastCashOutNotify = {};
-  static final Map<String, DateTime> _lastNewGameNotify = {};
-  static final Map<String, DateTime> _lastGameEndedNotify = {};
-  static const _notifyWindow = Duration(seconds: 15);
-
-  /// When new games or buy-in changes appear in realtime data, create notifications for the executive.
-  void _notifyNewOngoingGamesIfAny(RealtimeData data) {
-    final previousById = {for (final g in _data.ongoingGames) g.id: g};
-    final previousIds = previousById.keys.toSet();
-    final now = DateTime.now();
-
-    // New game started (dedupe by game id)
-    _lastNewGameNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
-    final newGames = data.ongoingGames.where((g) => !previousIds.contains(g.id)).toList();
-    for (final g in newGames) {
-      final dedupeKey = 'newgame-${g.id}';
-      if (_lastNewGameNotify.containsKey(dedupeKey)) continue;
-      _lastNewGameNotify[dedupeKey] = now;
-      NotificationService.instance.createNotification(
-        title: 'New game started',
-        message: '${g.account} – Buy-in ${_fmt.format(g.buyIn)} at ${_formatTableDateTime(g.table)} (${g.gameType})',
-        type: 'info',
-      );
-    }
-
-    // Buy-in added to current game (show time when we detected it, not game start time)
-    // Dedupe: only one notification per (gameId, new buyIn) within a short window (avoids double from two instances or race).
-    _lastBuyInNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
-    for (final g in data.ongoingGames) {
-      final prev = previousById[g.id];
-      if (prev == null || g.buyIn <= prev.buyIn) continue;
-      final dedupeKey = 'buyin-${g.id}-${g.buyIn}';
-      if (_lastBuyInNotify.containsKey(dedupeKey)) continue;
-      _lastBuyInNotify[dedupeKey] = now;
-      final added = g.buyIn - prev.buyIn;
-      final nowStr = _dateTimeFmt.format(now);
-      NotificationService.instance.createNotification(
-        title: 'Buy-in added',
-        message: '${g.account} added ${_fmt.format(added)} at $nowStr – total ${_fmt.format(g.buyIn)} (${g.gameType})',
-        type: 'info',
-      );
-    }
-
-    // Cash-out added to current game (same setup as buy-in; dedupe per gameId + new cashOut)
-    _lastCashOutNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
-    for (final g in data.ongoingGames) {
-      final prev = previousById[g.id];
-      if (prev == null || g.cashOut <= prev.cashOut) continue;
-      final dedupeKey = 'cashout-${g.id}-${g.cashOut}';
-      if (_lastCashOutNotify.containsKey(dedupeKey)) continue;
-      _lastCashOutNotify[dedupeKey] = now;
-      final added = g.cashOut - prev.cashOut;
-      final nowStr = _dateTimeFmt.format(now);
-      NotificationService.instance.createNotification(
-        title: 'Cash-out added',
-        message: '${g.account} cashed out ${_fmt.format(added)} at $nowStr – total ${_fmt.format(g.cashOut)} (${g.gameType})',
-        type: 'warning',
-      );
-    }
-
-    // Game ended: was in previous ongoing list but not in current (end game in gamebook)
-    final currentIds = data.ongoingGames.map((g) => g.id).toSet();
-    final endedIds = previousIds.difference(currentIds);
-    _lastGameEndedNotify.removeWhere((_, t) => now.difference(t) > _notifyWindow);
-    for (final id in endedIds) {
-      final g = previousById[id];
-      if (g == null) continue;
-      final dedupeKey = 'ended-${g.id}';
-      if (_lastGameEndedNotify.containsKey(dedupeKey)) continue;
-      _lastGameEndedNotify[dedupeKey] = now;
-      final nowStr = _dateTimeFmt.format(now);
-      final winLoss = g.buyIn - g.cashOut;
-      NotificationService.instance.createNotification(
-        title: 'Game has ended',
-        message: '${g.account} – game ended at $nowStr (${g.gameType}) – Win/Loss: ${_fmt.format(winLoss)}',
-        type: 'info',
-      );
-    }
   }
 
   @override

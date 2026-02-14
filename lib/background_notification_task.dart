@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'constants/api_config.dart';
@@ -12,7 +13,13 @@ void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     WidgetsFlutterBinding.ensureInitialized();
     try {
-      final res = await http.get(Uri.parse(notificationsApiUrl)).timeout(
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final headers = <String, String>{};
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+      final res = await http.get(Uri.parse(notificationsApiUrl), headers: headers).timeout(
             const Duration(seconds: 10),
           );
       if (res.statusCode != 200) return true;

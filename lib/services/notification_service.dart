@@ -4,16 +4,29 @@ import 'package:http/http.dart' as http;
 
 import '../constants/api_config.dart';
 import '../models/types.dart';
+import 'auth_service.dart';
 import 'system_notification_stub.dart' if (dart.library.io) 'system_notification_io.dart' as system_notification;
 
 class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
-  /// Fetches notifications for the executive app.
+  Future<Map<String, String>> _authHeaders() async {
+    final token = await AuthService.instance.getToken();
+    final headers = <String, String>{};
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
+  /// Fetches notifications for the executive app. Read state is per user (requires auth).
   Future<List<NotificationItem>> fetchNotifications() async {
     try {
-      final res = await http.get(Uri.parse(notificationsApiUrl));
+      final headers = await _authHeaders();
+      final uri = Uri.parse(notificationsApiUrl).replace(queryParameters: {'_': DateTime.now().millisecondsSinceEpoch.toString()});
+      final res = await http.get(uri, headers: headers);
+      if (res.statusCode == 401) return [];
       if (res.statusCode != 200) return [];
       final json = _parseJson(res.body);
       if (json == null) return [];
@@ -41,10 +54,11 @@ class NotificationService {
     }
   }
 
-  /// Clears all notifications (DELETE /api/notifications).
+  /// Clears this user's read state (DELETE /api/notifications). Requires auth.
   Future<bool> clearAll() async {
     try {
-      final res = await http.delete(Uri.parse(notificationsApiUrl));
+      final headers = await _authHeaders();
+      final res = await http.delete(Uri.parse(notificationsApiUrl), headers: headers);
       return res.statusCode >= 200 && res.statusCode < 300;
     } catch (_) {
       return false;
@@ -70,12 +84,14 @@ class NotificationService {
     }
   }
 
-  /// Mark one notification as read (PATCH /api/notifications/:id). Calls [onNotificationsChanged] on success.
+  /// Mark one notification as read for this user (PATCH /api/notifications/:id). Requires auth.
   Future<bool> markAsRead(int id) async {
     try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
       final res = await http.patch(
         Uri.parse(notificationMarkReadUrl(id)),
-        headers: {'Content-Type': 'application/json'},
+        headers: headers,
         body: jsonEncode({'read': true}),
       );
       final ok = res.statusCode >= 200 && res.statusCode < 300;

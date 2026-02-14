@@ -42,22 +42,25 @@ class LayoutScreen extends StatefulWidget {
 /// Order of views in bottom nav and PageView (portrait).
 const _viewOrder = [ViewType.realTime, ViewType.daily, ViewType.monthly, ViewType.marker, ViewType.ranking];
 
-class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
   ViewType _activeView = ViewType.realTime;
   /// When null = no transition. When set, we're animating from _previousView to _activeView.
   ViewType? _previousView;
   late final AnimationController _contentTransitionController;
+  late final AnimationController _toastSlideController;
   late final PageController _pageController;
   late Widget _cachedContent;
   Widget? _outgoingContent;
   bool _notificationOpen = false;
   bool _languageOpen = false;
   bool _profileOpen = false;
+  bool _showNotificationToast = false;
   bool _isServerOnline = true;
   StreamSubscription<bool>? _serverStatusSub;
   List<NotificationItem> _notifications = [];
   bool _notificationsLoading = false;
   AuthUser? _currentUser;
+  Timer? _notificationPollTimer;
 
   @override
   void initState() {
@@ -77,6 +80,10 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
     };
     // Load notifications on start so red dot shows for unread without opening panel first
     _loadNotifications();
+    // Poll every 2s on other tabs. On Real Time tab, notifications are synced with ongoing games via RealTimeView.onPollTick (same 3s).
+    _notificationPollTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (mounted && _activeView != ViewType.realTime) _loadNotifications(silent: true);
+    });
     _pageController = PageController(initialPage: 0);
     _contentTransitionController = AnimationController(
       vsync: this,
@@ -93,17 +100,30 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
         });
       }
     });
+    _toastSlideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _toastSlideController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed && mounted) {
+        setState(() => _showNotificationToast = false);
+      }
+    });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       platform_init.scheduleOneOffNotificationCheck();
+    } else if (state == AppLifecycleState.resumed && mounted) {
+      _loadNotifications();
     }
   }
 
   @override
   void dispose() {
+    _notificationPollTimer?.cancel();
+    _toastSlideController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     NotificationService.onNotificationsChanged = null;
     _serverStatusSub?.cancel();
@@ -118,50 +138,90 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
     return i >= 0 ? i : 0;
   }
 
-  Future<void> _loadNotifications() async {
+  Future<void> _loadNotifications({bool silent = false}) async {
     if (!mounted) return;
     final previousIds = Set<int>.from(_notifications.map((n) => n.id));
-    setState(() => _notificationsLoading = true);
+    if (!silent) setState(() => _notificationsLoading = true);
     final list = await NotificationService.instance.fetchNotifications();
     if (!mounted) return;
-    final hasNew = previousIds.isNotEmpty && list.any((n) => !previousIds.contains(n.id));
+    // Don't replace with empty on fetch failure so red dot doesn't disappear
+    final nextList = list.isNotEmpty || _notifications.isEmpty ? list : _notifications;
+    final hasNew = nextList.any((n) => !previousIds.contains(n.id));
+    final hasNewUnread = hasNew && nextList.any((n) => !previousIds.contains(n.id) && !n.isRead);
     setState(() {
-      _notifications = list;
+      _notifications = nextList;
       _notificationsLoading = false;
     });
-    if (hasNew && mounted) {
+    // Show sliding toast: slide in from right, stay 3s, slide out to right
+    final shouldShowToast = mounted && hasNewUnread;
+    if (shouldShowToast) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        final l10n = AppLocalizations.of(context);
-        final size = MediaQuery.sizeOf(context);
-        final isPortrait = size.width < 1024;
-        // Portrait: bottom nav is 80px — keep toast above it so it's not covered
-        final bottomInset = isPortrait ? 24.0 + 80.0 : 24.0;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.newActivityCheckNotifications,
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: surfaceDarkMid,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-            margin: EdgeInsets.only(left: size.width * 0.35, bottom: bottomInset, right: 24),
-            action: SnackBarAction(
-              label: l10n.viewNotifications,
-              textColor: primaryIndigo,
-              onPressed: () => setState(() => _notificationOpen = true),
-            ),
-          ),
-        );
+        setState(() => _showNotificationToast = true);
+        _toastSlideController.forward();
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) _toastSlideController.reverse();
+        });
       });
     }
+  }
+
+  Widget _buildNotificationToast(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final size = MediaQuery.sizeOf(context);
+    final isPortrait = size.width < 1024;
+    final bottomInset = isPortrait ? 24.0 + 80.0 : 24.0;
+    return Positioned(
+      right: 0,
+      bottom: bottomInset,
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: _toastSlideController, curve: Curves.easeOutCubic)),
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 320,
+              margin: const EdgeInsets.only(right: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: surfaceDarkMid,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(-2, 0)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.newActivityCheckNotifications,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() => _notificationOpen = true);
+                    },
+                    child: Text(l10n.viewNotifications, style: TextStyle(color: primaryIndigo, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _clearAllNotifications() async {
     final ok = await NotificationService.instance.clearAll();
     if (!mounted) return;
-    if (ok) setState(() => _notifications = []);
+    if (ok) await _loadNotifications();
   }
 
   Future<void> _markNotificationAsRead(NotificationItem n) async {
@@ -200,7 +260,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
   Widget _buildView(ViewType view) {
     switch (view) {
       case ViewType.realTime:
-        return const RealTimeView();
+        return RealTimeView(onPollTick: () => _loadNotifications(silent: true));
       case ViewType.daily:
         return const DailySettlementView();
       case ViewType.monthly:
@@ -558,6 +618,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
               ),
             ),
             ),
+            if (_showNotificationToast) _buildNotificationToast(context),
           ],
         ),
       ),
