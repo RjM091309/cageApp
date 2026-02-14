@@ -42,21 +42,6 @@ class DailySettlementService {
   DailySettlementService._();
   static final DailySettlementService instance = DailySettlementService._();
 
-  static String _shortDate(String yyyyMmDd) {
-    try {
-      final parts = yyyyMmDd.split('-');
-      if (parts.length != 3) return yyyyMmDd;
-      final y = int.tryParse(parts[0]) ?? 0;
-      final m = (int.tryParse(parts[1]) ?? 1) - 1;
-      final d = int.tryParse(parts[2]) ?? 1;
-      const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      final day = DateTime(y, m, d).weekday;
-      return weekdays[day - 1];
-    } catch (_) {
-      return yyyyMmDd;
-    }
-  }
-
   static String _dateLabel(String yyyyMmDd, DateTime today, List<String> weekdays) {
     try {
       final parts = yyyyMmDd.split('-');

@@ -3,3 +3,5 @@
 bool get isAndroid => false;
 
 Future<void> initAndroidIfNeeded() async {}
+
+Future<void> scheduleOneOffNotificationCheck() async {}

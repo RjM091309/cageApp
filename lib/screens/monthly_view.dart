@@ -60,14 +60,14 @@ class _MonthlyViewState extends State<MonthlyView> {
       case 'February': return l10n.monthFebruary;
       case 'March': return l10n.monthMarch;
       case 'April': return l10n.monthApril;
-      case 'May': return key;
-      case 'June': return key;
-      case 'July': return key;
-      case 'August': return key;
-      case 'September': return key;
-      case 'October': return key;
-      case 'November': return key;
-      case 'December': return key;
+      case 'May': return l10n.monthMay;
+      case 'June': return l10n.monthJune;
+      case 'July': return l10n.monthJuly;
+      case 'August': return l10n.monthAugust;
+      case 'September': return l10n.monthSeptember;
+      case 'October': return l10n.monthOctober;
+      case 'November': return l10n.monthNovember;
+      case 'December': return l10n.monthDecember;
       default: return key;
     }
   }
@@ -121,7 +121,7 @@ class _MonthlyViewState extends State<MonthlyView> {
                 crossAxisSpacing: 12,
                 childAspectRatio: 1.9,
                 children: [
-                  _metricCard(l10n.topMonthlyCommission, r.topCommissionAgentLabel.isNotEmpty ? 'Rank #1 – ${r.topCommissionAgentLabel}' : l10n.rankAgentDragon, _fmt.format(r.topCommissionAmount), Icons.star, amberAccent),
+                  _metricCard(l10n.topMonthlyCommission, l10n.total, _fmt.format(r.commissionTotal), Icons.star, amberAccent),
                   _metricCard(l10n.accumulatedExpenses, l10n.mtdExpenditure, _fmt.format(r.junketExpenses), Icons.verified_user, roseAccent),
                   _metricCard(l10n.gamesRolling, l10n.totalRolling, _fmt.format(r.rollingGames), Icons.sports_esports, primaryIndigo),
                 ],
@@ -130,7 +130,7 @@ class _MonthlyViewState extends State<MonthlyView> {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _metricCard(l10n.topMonthlyCommission, r.topCommissionAgentLabel.isNotEmpty ? 'Rank #1 – ${r.topCommissionAgentLabel}' : l10n.rankAgentDragon, _fmt.format(r.topCommissionAmount), Icons.star, amberAccent),
+                _metricCard(l10n.topMonthlyCommission, l10n.total, _fmt.format(r.commissionTotal), Icons.star, amberAccent),
                 const SizedBox(height: 12),
                 _metricCard(l10n.accumulatedExpenses, l10n.mtdExpenditure, _fmt.format(r.junketExpenses), Icons.verified_user, roseAccent),
                 const SizedBox(height: 12),
@@ -185,20 +185,22 @@ class _MonthlyViewState extends State<MonthlyView> {
                   }
                   final maxRolling = list.map((e) => e.value).reduce((a, b) => a > b ? a : b).toDouble();
                   final barHeight = 28.0;
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (int i = 0; i < list.length; i++) ...[
-                        if (i > 0) const SizedBox(height: 12),
-                        _HorizontalCasinoBar(
-                          label: _monthLabel(context, list[i].monthKey),
-                          value: list[i].value,
-                          maxValue: maxRolling > 0 ? maxRolling : 1,
-                          barHeight: barHeight,
-                          animate: _chartAnimate,
-                        ),
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (int i = 0; i < list.length; i++) ...[
+                          if (i > 0) const SizedBox(height: 12),
+                          _HorizontalCasinoBar(
+                            label: _monthLabel(context, list[i].monthKey),
+                            value: list[i].value,
+                            maxValue: maxRolling > 0 ? maxRolling : 1,
+                            barHeight: barHeight,
+                            animate: _chartAnimate,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   );
                 },
               ),
@@ -216,17 +218,17 @@ class _MonthlyViewState extends State<MonthlyView> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 21),
           decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-          child: Row(
+          child: const Row(
             children: [
               SkeletonBox(width: 28, height: 28, borderRadius: 10),
-              const SizedBox(width: 14),
+              SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SkeletonBox(height: 12, width: 180, borderRadius: 4),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     SkeletonBox(height: 18, width: 100, borderRadius: 4),
                   ],
                 ),
@@ -241,17 +243,17 @@ class _MonthlyViewState extends State<MonthlyView> {
             final card = Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 21),
               decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
-              child: Row(
+              child: const Row(
                 children: [
                   SkeletonBox(width: 24, height: 24, borderRadius: 8),
-                  const SizedBox(width: 14),
+                  SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         SkeletonBox(height: 10, width: 120, borderRadius: 4),
-                        const SizedBox(height: 6),
+                        SizedBox(height: 6),
                         SkeletonBox(height: 16, width: 80, borderRadius: 4),
                       ],
                     ),
@@ -287,15 +289,15 @@ class _MonthlyViewState extends State<MonthlyView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              const Row(
                 children: [
                   SkeletonBox(width: 40, height: 40, borderRadius: 12),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SkeletonBox(height: 18, width: 160, borderRadius: 4),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       SkeletonBox(height: 12, width: 200, borderRadius: 4),
                     ],
                   ),
@@ -304,12 +306,12 @@ class _MonthlyViewState extends State<MonthlyView> {
               const SizedBox(height: 24),
               for (int i = 0; i < 4; i++) ...[
                 if (i > 0) const SizedBox(height: 12),
-                Row(
+                const Row(
                   children: [
                     SkeletonBox(width: 72, height: 22, borderRadius: 4),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(child: SkeletonBox(height: 28, borderRadius: 4)),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     SkeletonBox(width: 56, height: 22, borderRadius: 4),
                   ],
                 ),

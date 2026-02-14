@@ -182,6 +182,18 @@ abstract class AppLocalizations {
   /// **'Clear all notifications'**
   String get clearAllNotifications;
 
+  /// No description provided for @newActivityCheckNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'New activity — check notifications'**
+  String get newActivityCheckNotifications;
+
+  /// No description provided for @viewNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get viewNotifications;
+
   /// No description provided for @executiveAccount.
   ///
   /// In en, this message translates to:
@@ -314,6 +326,12 @@ abstract class AppLocalizations {
   /// **'Monthly Rolling'**
   String get gamesRolling;
 
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
   /// No description provided for @totalRolling.
   ///
   /// In en, this message translates to:
@@ -355,6 +373,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'April'**
   String get monthApril;
+
+  /// No description provided for @monthMay.
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get monthMay;
+
+  /// No description provided for @monthJune.
+  ///
+  /// In en, this message translates to:
+  /// **'June'**
+  String get monthJune;
+
+  /// No description provided for @monthJuly.
+  ///
+  /// In en, this message translates to:
+  /// **'July'**
+  String get monthJuly;
+
+  /// No description provided for @monthAugust.
+  ///
+  /// In en, this message translates to:
+  /// **'August'**
+  String get monthAugust;
+
+  /// No description provided for @monthSeptember.
+  ///
+  /// In en, this message translates to:
+  /// **'September'**
+  String get monthSeptember;
+
+  /// No description provided for @monthOctober.
+  ///
+  /// In en, this message translates to:
+  /// **'October'**
+  String get monthOctober;
+
+  /// No description provided for @monthNovember.
+  ///
+  /// In en, this message translates to:
+  /// **'November'**
+  String get monthNovember;
+
+  /// No description provided for @monthDecember.
+  ///
+  /// In en, this message translates to:
+  /// **'December'**
+  String get monthDecember;
 
   /// No description provided for @totalBuyIn.
   ///
@@ -409,6 +475,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Real-Time Marker'**
   String get realTimeMarker;
+
+  /// No description provided for @totalMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Marker'**
+  String get totalMarker;
 
   /// No description provided for @activeBalance.
   ///
@@ -470,6 +542,12 @@ abstract class AppLocalizations {
   /// **'WIN RATIO'**
   String get winRatio;
 
+  /// No description provided for @commission.
+  ///
+  /// In en, this message translates to:
+  /// **'COMMISSION'**
+  String get commission;
+
   /// No description provided for @totalChips.
   ///
   /// In en, this message translates to:
@@ -482,10 +560,16 @@ abstract class AppLocalizations {
   /// **'Cash Balance'**
   String get cashBalance;
 
-  /// No description provided for @guestBalance.
+  /// No description provided for @houseBalance.
   ///
   /// In en, this message translates to:
   /// **'House Balance'**
+  String get houseBalance;
+
+  /// No description provided for @guestBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest Balance'**
   String get guestBalance;
 
   /// No description provided for @netJunketMoney.

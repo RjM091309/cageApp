@@ -51,6 +51,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearAllNotifications => 'Clear all notifications';
 
   @override
+  String get newActivityCheckNotifications =>
+      'New activity — check notifications';
+
+  @override
+  String get viewNotifications => 'View';
+
+  @override
   String get executiveAccount => 'Executive Account';
 
   @override
@@ -121,6 +128,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamesRolling => 'Monthly Rolling';
 
   @override
+  String get total => 'Total';
+
+  @override
   String get totalRolling => 'Total Rolling';
 
   @override
@@ -140,6 +150,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get monthApril => 'April';
+
+  @override
+  String get monthMay => 'May';
+
+  @override
+  String get monthJune => 'June';
+
+  @override
+  String get monthJuly => 'July';
+
+  @override
+  String get monthAugust => 'August';
+
+  @override
+  String get monthSeptember => 'September';
+
+  @override
+  String get monthOctober => 'October';
+
+  @override
+  String get monthNovember => 'November';
+
+  @override
+  String get monthDecember => 'December';
 
   @override
   String get totalBuyIn => 'Buy-in';
@@ -167,6 +201,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get realTimeMarker => 'Real-Time Marker';
+
+  @override
+  String get totalMarker => 'Total Marker';
 
   @override
   String get activeBalance => 'ACTIVE BALANCE';
@@ -200,13 +237,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get winRatio => 'WIN RATIO';
 
   @override
+  String get commission => 'COMMISSION';
+
+  @override
   String get totalChips => 'Total Chip';
 
   @override
   String get cashBalance => 'Cash Balance';
 
   @override
-  String get guestBalance => 'House Balance';
+  String get houseBalance => 'House Balance';
+
+  @override
+  String get guestBalance => 'Guest Balance';
 
   @override
   String get netJunketMoney => 'Net Junket Cash';

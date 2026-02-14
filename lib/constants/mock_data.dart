@@ -26,11 +26,11 @@ final mockMarkers = <MarkerEntry>[
 ];
 
 final mockRanking = <RankingItem>[
-  RankingItem(name: 'Agent Golden Dragon', rolling: 45000000, winnings: 3200000, losses: 1500000, rank: 1),
-  RankingItem(name: 'VIP Phoenix-01', rolling: 32000000, winnings: 1800000, losses: 2100000, rank: 2),
-  RankingItem(name: 'Agent Silver Tiger', rolling: 28000000, winnings: 2500000, losses: 900000, rank: 3),
-  RankingItem(name: 'VIP Jade Emperor', rolling: 25000000, winnings: 1200000, losses: 400000, rank: 4),
-  RankingItem(name: 'VIP Iron Fist', rolling: 19000000, winnings: 900000, losses: 1200000, rank: 5),
+  RankingItem(name: 'Agent Golden Dragon', rolling: 45000000, winnings: 3200000, losses: 1500000, commission: 450000, rank: 1),
+  RankingItem(name: 'VIP Phoenix-01', rolling: 32000000, winnings: 1800000, losses: 2100000, commission: 320000, rank: 2),
+  RankingItem(name: 'Agent Silver Tiger', rolling: 28000000, winnings: 2500000, losses: 900000, commission: 280000, rank: 3),
+  RankingItem(name: 'VIP Jade Emperor', rolling: 25000000, winnings: 1200000, losses: 400000, commission: 250000, rank: 4),
+  RankingItem(name: 'VIP Iron Fist', rolling: 19000000, winnings: 900000, losses: 1200000, commission: 190000, rank: 5),
 ];
 
 final mockNotifications = <NotificationItem>[

@@ -64,7 +64,7 @@ class RealtimeData {
   }
 
   /// Empty placeholder for loading/error states.
-  factory RealtimeData.empty() => RealtimeData(
+  const RealtimeData.empty() : this(
         success: false,
         totalChips: 0,
         cashBalance: 0,

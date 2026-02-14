@@ -12,6 +12,7 @@ import '../services/server_status_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/active_view_scope.dart';
 import '../widgets/drawer_panel.dart';
+import '../platform_init_stub.dart' if (dart.library.io) '../platform_init_io.dart' as platform_init;
 import 'real_time_view.dart';
 import 'daily_settlement_view.dart';
 import 'monthly_view.dart';
@@ -41,7 +42,7 @@ class LayoutScreen extends StatefulWidget {
 /// Order of views in bottom nav and PageView (portrait).
 const _viewOrder = [ViewType.realTime, ViewType.daily, ViewType.monthly, ViewType.marker, ViewType.ranking];
 
-class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderStateMixin {
+class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   ViewType _activeView = ViewType.realTime;
   /// When null = no transition. When set, we're animating from _previousView to _activeView.
   ViewType? _previousView;
@@ -61,6 +62,7 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _cachedContent = _buildView(_activeView);
     AuthService.instance.getStoredUser().then((user) {
       if (mounted) setState(() => _currentUser = user);
@@ -94,7 +96,15 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      platform_init.scheduleOneOffNotificationCheck();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     NotificationService.onNotificationsChanged = null;
     _serverStatusSub?.cancel();
     ServerStatusService.instance.stop();
@@ -110,13 +120,42 @@ class _LayoutScreenState extends State<LayoutScreen> with SingleTickerProviderSt
 
   Future<void> _loadNotifications() async {
     if (!mounted) return;
+    final previousIds = Set<int>.from(_notifications.map((n) => n.id));
     setState(() => _notificationsLoading = true);
     final list = await NotificationService.instance.fetchNotifications();
     if (!mounted) return;
+    final hasNew = previousIds.isNotEmpty && list.any((n) => !previousIds.contains(n.id));
     setState(() {
       _notifications = list;
       _notificationsLoading = false;
     });
+    if (hasNew && mounted) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context);
+        final size = MediaQuery.sizeOf(context);
+        final isPortrait = size.width < 1024;
+        // Portrait: bottom nav is 80px — keep toast above it so it's not covered
+        final bottomInset = isPortrait ? 24.0 + 80.0 : 24.0;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.newActivityCheckNotifications,
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: surfaceDarkMid,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            margin: EdgeInsets.only(left: size.width * 0.35, bottom: bottomInset, right: 24),
+            action: SnackBarAction(
+              label: l10n.viewNotifications,
+              textColor: primaryIndigo,
+              onPressed: () => setState(() => _notificationOpen = true),
+            ),
+          ),
+        );
+      });
+    }
   }
 
   Future<void> _clearAllNotifications() async {

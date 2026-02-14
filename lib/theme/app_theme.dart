@@ -24,6 +24,10 @@ final accentPurple = const Color(0xFFA78BFA);
 final emeraldAccent = const Color(0xFF10B981);
 final roseAccent = const Color(0xFFF43F5E);
 final amberAccent = const Color(0xFFF59E0B);
+/// Teal accent (e.g. distinct from other stat cards)
+final tealAccent = const Color(0xFF14B8A6);
+/// Brown accent (e.g. House Balance card)
+final brownAccent = const Color(0xFFB45309);
 
 /// Gradient for primary actions, active states, progress (like sample.html)
 LinearGradient get primaryGradient => const LinearGradient(

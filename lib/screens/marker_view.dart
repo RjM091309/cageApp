@@ -82,6 +82,10 @@ class _MarkerViewState extends State<MarkerView> {
               Icon(Icons.description, color: primaryIndigo, size: 20),
               const SizedBox(width: 8),
               Text(l10n.realTimeMarker, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Spacer(),
+              Text(l10n.totalMarker, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[400])),
+              const SizedBox(width: 8),
+              Text(_fmt.format(0), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             ],
           ),
           const SizedBox(height: 24),
@@ -94,6 +98,7 @@ class _MarkerViewState extends State<MarkerView> {
         ],
       );
     }
+    final totalMarkerBalance = _markers.fold<int>(0, (sum, e) => sum + e.balance);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -102,6 +107,10 @@ class _MarkerViewState extends State<MarkerView> {
             Icon(Icons.description, color: primaryIndigo, size: 20),
             const SizedBox(width: 8),
             Text(l10n.realTimeMarker, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            const Spacer(),
+            Text(l10n.totalMarker, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[400])),
+            const SizedBox(width: 8),
+            Text(_fmt.format(totalMarkerBalance), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
         const SizedBox(height: 24),
@@ -139,10 +148,10 @@ class _MarkerViewState extends State<MarkerView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
+        const Row(
           children: [
             SkeletonBox(width: 20, height: 20, borderRadius: 6),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             SkeletonBox(width: 180, height: 20, borderRadius: 4),
           ],
         ),
@@ -175,7 +184,7 @@ class _MarkerViewState extends State<MarkerView> {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: borderColor),
                   ),
-                  child: Column(
+                  child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -187,9 +196,9 @@ class _MarkerViewState extends State<MarkerView> {
                         ],
                       ),
                       SkeletonBox(height: 14, width: 160, borderRadius: 4),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       SkeletonBox(height: 18, width: 140, borderRadius: 4),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       SkeletonBox(height: 28, width: 100, borderRadius: 4),
                     ],
                   ),

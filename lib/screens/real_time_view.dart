@@ -39,12 +39,48 @@ DateTime? _parseDateTimeAsUtcOrLocal(String raw) {
   return null;
 }
 
-TableCell _tableCell(Widget child) => TableCell(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: child,
+Widget _skeletonGameCard() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SkeletonBox(width: 38, height: 38, borderRadius: 10),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SkeletonBox(width: 100, height: 14, borderRadius: 4),
+                    SkeletonBox(width: 50, height: 18, borderRadius: 10),
+                  ],
+                ),
+                SizedBox(height: 6),
+                SkeletonBox(width: 80, height: 10, borderRadius: 4),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    SkeletonBox(width: 70, height: 14, borderRadius: 4),
+                    SizedBox(width: 12),
+                    SkeletonBox(width: 70, height: 14, borderRadius: 4),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
+  }
 
 class RealTimeView extends StatefulWidget {
   const RealTimeView({super.key});
@@ -55,7 +91,7 @@ class RealTimeView extends StatefulWidget {
 
 class _RealTimeViewState extends State<RealTimeView> {
   final RealtimeService _service = RealtimeService.instance;
-  RealtimeData _data = RealtimeData.empty();
+  RealtimeData _data = const RealtimeData.empty();
   bool _loading = true;
   Timer? _pollTimer;
 
@@ -64,11 +100,12 @@ class _RealTimeViewState extends State<RealTimeView> {
     super.initState();
     _load();
     // HTTP polling on all platforms (backend has REST /api/realtime only; no Socket.IO emit)
+    // Poll every 3s: always check for new games/changes and create notifications (any tab).
+    // Only refresh UI when on Real Time tab to avoid delay when user is on Monthly/Marker etc.
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       if (!mounted) return;
       _service.fetchRealtime().then((data) {
         if (!mounted) return;
-        if (ActiveViewScope.find(context)?.activeView != ViewType.realTime) return;
         _notifyNewOngoingGamesIfAny(data);
         setState(() => _data = data);
       });
@@ -180,7 +217,7 @@ class _RealTimeViewState extends State<RealTimeView> {
       children: [
         LayoutBuilder(
           builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 900 ? 5 : (constraints.maxWidth > 600 ? 3 : 2);
+            final crossAxisCount = constraints.maxWidth > 900 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
             final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
             final aspectRatio = isTabletWidth ? 1.65 : 1.95;
             return GridView.count(
@@ -190,7 +227,7 @@ class _RealTimeViewState extends State<RealTimeView> {
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
               childAspectRatio: aspectRatio,
-              children: List.generate(5, (_) => _skeletonStatCard()),
+              children: List.generate(6, (_) => _skeletonStatCard()),
             );
           },
         ),
@@ -204,15 +241,15 @@ class _RealTimeViewState extends State<RealTimeView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
+              const Padding(
+                padding: EdgeInsets.all(16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
                         SkeletonBox(width: 18, height: 18, borderRadius: 6),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         SkeletonBox(width: 120, height: 16, borderRadius: 4),
                       ],
                     ),
@@ -221,48 +258,11 @@ class _RealTimeViewState extends State<RealTimeView> {
                 ),
               ),
               const Divider(height: 1, color: Colors.white12),
-              LayoutBuilder(
-                builder: (context, c) {
-                  final isMobile = c.maxWidth < 600;
-                  final table = Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(1.5),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1.2),
-                      3: FlexColumnWidth(1.2),
-                      4: FlexColumnWidth(0.8),
-                    },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05)),
-                        children: [
-                          _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
-                          _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
-                          _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
-                          _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
-                          _tableCell(SkeletonBox(height: 12, borderRadius: 4)),
-                        ],
-                      ),
-                      ...List.generate(6, (_) => TableRow(
-                        children: [
-                          _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
-                          _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
-                          _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
-                          _tableCell(SkeletonBox(height: 14, borderRadius: 4)),
-                          _tableCell(SkeletonBox(width: 60, height: 20, borderRadius: 12)),
-                        ],
-                      )),
-                    ],
-                  );
-                  if (isMobile) {
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SizedBox(width: 420, child: table),
-                    );
-                  }
-                  return table;
-                },
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: List.generate(6, (_) => _skeletonGameCard()),
+                ),
               ),
             ],
           ),
@@ -279,7 +279,7 @@ class _RealTimeViewState extends State<RealTimeView> {
         border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         color: Colors.white.withValues(alpha: 0.03),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -287,12 +287,12 @@ class _RealTimeViewState extends State<RealTimeView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SkeletonBox(width: 28, height: 28, borderRadius: 10),
-              const SizedBox.shrink(),
+              SizedBox.shrink(),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           SkeletonBox(width: 70, height: 10, borderRadius: 4),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           SkeletonBox(width: 90, height: 18, borderRadius: 4),
         ],
       ),
@@ -303,7 +303,7 @@ class _RealTimeViewState extends State<RealTimeView> {
     final statusLabel = game.status == 'Active' ? l10n.statusActive : l10n.statusSettling;
     final nameMatch = RegExp(r'^(.+?)\s*\(([^)]+)\)\s*$').firstMatch(game.account);
     final displayName = nameMatch != null ? nameMatch.group(1)!.trim() : game.account;
-    final codeSubtitle = nameMatch != null ? nameMatch.group(2)!.trim() : null;
+    final codeSubtitle = nameMatch?.group(2)!.trim();
     
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -421,9 +421,10 @@ class _RealTimeViewState extends State<RealTimeView> {
       children: [
         LayoutBuilder(
           builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 900 ? 5 : (constraints.maxWidth > 600 ? 3 : 2);
+            final crossAxisCount = constraints.maxWidth > 900 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
             final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
             final aspectRatio = isTabletWidth ? 1.65 : 1.95;
+            final houseBalance = _data.totalChips + _data.cashBalance;
             return GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -443,6 +444,12 @@ class _RealTimeViewState extends State<RealTimeView> {
                   value: _fmt.format(_data.cashBalance),
                   icon: Icons.payments,
                   color: StatCardColor.emerald,
+                ),
+                StatCard(
+                  label: l10n.houseBalance,
+                  value: _fmt.format(houseBalance),
+                  icon: Icons.home_work,
+                  color: StatCardColor.brown,
                 ),
                 StatCard(
                   label: l10n.guestBalance,
@@ -497,11 +504,11 @@ class _RealTimeViewState extends State<RealTimeView> {
                 ),
               ),
               const Divider(height: 1, color: Colors.white12),
-              LayoutBuilder(
-                builder: (context, c) {
-                  final isMobile = c.maxWidth < 600;
-                  final games = _data.ongoingGames;
-                  
+              Builder(
+                builder: (context) {
+                  // Newest first: sort by table (encoded_dt) descending so new games appear at top
+                  final games = List<OngoingGame>.from(_data.ongoingGames)
+                    ..sort((a, b) => b.table.compareTo(a.table));
                   if (games.isEmpty) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
@@ -513,68 +520,12 @@ class _RealTimeViewState extends State<RealTimeView> {
                       ),
                     );
                   }
-                  
-                  if (isMobile) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: games.map((g) => _buildMobileGameCard(l10n, g)).toList(),
-                      ),
-                    );
-                  }
-                  
-                  final table = Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(1.5),
-                      1: FlexColumnWidth(1),
-                      2: FlexColumnWidth(1.2),
-                      3: FlexColumnWidth(1.2),
-                      4: FlexColumnWidth(0.8),
-                    },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05)),
-                        children: [
-                          _tableCell(Text(l10n.account, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                          _tableCell(Text(l10n.gameType, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                          _tableCell(Text(l10n.buyIn, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                          _tableCell(Text(l10n.cashOut, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                          _tableCell(Text(l10n.status, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold))),
-                        ],
-                      ),
-                      ...games.map((g) {
-                        final statusLabel = g.status == 'Active' ? l10n.statusActive : l10n.statusSettling;
-                        return TableRow(
-                          children: [
-                            _tableCell(Text(g.account, style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500))),
-                            _tableCell(Text(g.gameType, style: TextStyle(fontSize: 13, color: Colors.grey[400]))),
-                            _tableCell(Text(_fmt.format(g.buyIn), style: TextStyle(fontSize: 13, color: primaryIndigo, fontFamily: 'monospace'))),
-                            _tableCell(Text(_fmt.format(g.cashOut), style: TextStyle(fontSize: 13, color: amberAccent, fontFamily: 'monospace'))),
-                            _tableCell(
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 6),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: g.status == 'Active' ? emeraldAccent.withValues(alpha: 0.2) : amberAccent.withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(statusLabel, style: TextStyle(fontSize: 10, color: g.status == 'Active' ? emeraldAccent : amberAccent, fontWeight: FontWeight.bold)),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
-                    ],
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: games.map((g) => _buildMobileGameCard(l10n, g)).toList(),
+                    ),
                   );
-                  return table;
                 },
               ),
             ],

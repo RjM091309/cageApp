@@ -33,20 +33,22 @@ class RankingService {
       if (list == null) return RankingPageResult(list: [], total: total);
       final items = list.map((e) {
         if (e is! Map) return null;
-        final name = e['agent_name']?.toString()?.trim() ?? '';
-        final code = e['agent_code']?.toString()?.trim() ?? '';
+        final name = e['agent_name']?.toString().trim() ?? '';
+        final code = e['agent_code']?.toString().trim() ?? '';
         final displayName = code.isNotEmpty && name.isNotEmpty
             ? '$name ($code)'
             : (name.isNotEmpty ? name : (code.isNotEmpty ? code : '—'));
         final rolling = _int(e['monthly_accumulated_rolling']);
         final winnings = _int(e['monthly_accumulated_winning']);
         final losses = _int(e['monthly_accumulated_losing']);
+        final commission = _int(e['monthly_accumulated_commission']);
         final rank = _int(e['rank_rolling']);
         return RankingItem(
           name: displayName,
           rolling: rolling,
           winnings: winnings,
           losses: losses,
+          commission: commission,
           rank: rank > 0 ? rank : 0,
         );
       }).whereType<RankingItem>().toList()

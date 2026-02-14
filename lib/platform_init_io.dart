@@ -15,17 +15,27 @@ Future<void> initAndroidIfNeeded() async {
   if (!Platform.isAndroid) return;
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
+    const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       systemNavigationBarColor: Colors.transparent,
     ),
   );
   await LocalNotificationService.instance.initialize();
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  await Workmanager().initialize(callbackDispatcher);
   await Workmanager().registerPeriodicTask(
     'cage-notification-check',
     'checkNotifications',
     frequency: const Duration(minutes: 15),
+    initialDelay: const Duration(seconds: 30),
+  );
+}
+
+/// Call when app goes to background so we check for notifications ~1 min later (Android).
+Future<void> scheduleOneOffNotificationCheck() async {
+  if (!Platform.isAndroid) return;
+  await Workmanager().registerOneOffTask(
+    'cage-notification-oneoff',
+    'checkNotifications',
     initialDelay: const Duration(minutes: 1),
   );
 }

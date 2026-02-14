@@ -59,7 +59,7 @@ class AuthService {
         lastname: map['lastname']?.toString() ?? '',
         userId: _int(map['user_id']),
         permissions: _int(map['permissions']),
-        role: map['role']?.toString()?.trim() ?? 'User',
+        role: map['role']?.toString().trim() ?? 'User',
       );
     } catch (_) {
       return null;

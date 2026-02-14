@@ -45,6 +45,7 @@ class RankingItem {
   final int rolling;
   final int winnings;
   final int losses;
+  final int commission;
   final int rank;
 
   RankingItem({
@@ -52,6 +53,7 @@ class RankingItem {
     required this.rolling,
     required this.winnings,
     required this.losses,
+    required this.commission,
     required this.rank,
   });
 }

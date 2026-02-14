@@ -1,7 +1,4 @@
-/// Base URL for Infinity Cage X API and Socket.IO.
-/// - Production (domain + HTTPS): https://yourdomain.com  (no port; Nginx proxies to backend)
-/// - Server (IP): http://45.32.103.210:4005
-/// - Local dev: http://localhost:4005 or http://192.168.x.x:4005
+
 
 const String apiBaseUrl = 'https://infinitycage.3core21.com';
 
@@ -20,6 +17,9 @@ String dailySettlementApiUrl({required String startDate, required String endDate
 
 String monthlyAccumulatedApiUrl({required int year, required int month}) =>
     '$apiBaseUrl/api/monthly-accumulated?year=$year&month=$month';
+
+String monthlyRollingCasinoByYearApiUrl(int year) =>
+    '$apiBaseUrl/api/monthly-rolling-casino-by-year?year=$year';
 
 String get markerApiUrl => '$apiBaseUrl/api/marker';
 

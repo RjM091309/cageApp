@@ -51,6 +51,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get clearAllNotifications => '모든 알림 지우기';
 
   @override
+  String get newActivityCheckNotifications => '새 활동이 있습니다 — 알림을 확인하세요';
+
+  @override
+  String get viewNotifications => '보기';
+
+  @override
   String get executiveAccount => '임원 계정';
 
   @override
@@ -121,6 +127,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gamesRolling => '월 누적 롤링';
 
   @override
+  String get total => '합계';
+
+  @override
   String get totalRolling => '총 롤링';
 
   @override
@@ -140,6 +149,30 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get monthApril => '4월';
+
+  @override
+  String get monthMay => '5월';
+
+  @override
+  String get monthJune => '6월';
+
+  @override
+  String get monthJuly => '7월';
+
+  @override
+  String get monthAugust => '8월';
+
+  @override
+  String get monthSeptember => '9월';
+
+  @override
+  String get monthOctober => '10월';
+
+  @override
+  String get monthNovember => '11월';
+
+  @override
+  String get monthDecember => '12월';
 
   @override
   String get totalBuyIn => '바이인';
@@ -167,6 +200,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get realTimeMarker => '실시간 마커';
+
+  @override
+  String get totalMarker => '총 마커';
 
   @override
   String get activeBalance => '활성 잔액';
@@ -199,13 +235,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get winRatio => '승률';
 
   @override
+  String get commission => '커미션';
+
+  @override
   String get totalChips => '토탈칩';
 
   @override
   String get cashBalance => '캐시 발렌스';
 
   @override
-  String get guestBalance => '하우스 발렌스';
+  String get houseBalance => '하우스 발렌스';
+
+  @override
+  String get guestBalance => '게스트 밸런스';
 
   @override
   String get netJunketMoney => '순 정캣 현금';

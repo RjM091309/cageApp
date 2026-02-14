@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-enum StatCardColor { primary, purple, emerald, rose, amber }
+enum StatCardColor { primary, purple, emerald, rose, amber, teal, brown }
 
 class StatCard extends StatelessWidget {
   final String label;
@@ -33,6 +33,8 @@ class StatCard extends StatelessWidget {
       case StatCardColor.emerald: return emeraldAccent;
       case StatCardColor.rose: return roseAccent;
       case StatCardColor.amber: return amberAccent;
+      case StatCardColor.teal: return tealAccent;
+      case StatCardColor.brown: return brownAccent;
     }
   }
 

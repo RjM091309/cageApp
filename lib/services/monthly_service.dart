@@ -23,7 +23,7 @@ class MonthlyResult {
   final int junketExpenses;
   final int rollingGames;
   final int rollingCasino; // current month only
-  final List<MonthlyCasinoRolling> casinoRollingByMonth; // last 4 months for chart
+  final List<MonthlyCasinoRolling> casinoRollingByMonth; // 12 months Jan–Dec for chart
 
   const MonthlyResult({
     required this.year,
@@ -63,14 +63,19 @@ class MonthlyService {
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
 
-  /// Fetches monthly accumulated for current month and last 4 months for casino chart.
+  /// Fetches monthly accumulated for current month and 12 months (Jan–Dec) for casino chart.
   Future<MonthlyResult> fetch({int? year, int? month}) async {
     final now = DateTime.now();
     final y = year ?? now.year;
     final m = month ?? now.month;
     try {
-      // Fetch current month (full data)
-      final res = await http.get(Uri.parse(monthlyAccumulatedApiUrl(year: y, month: m)));
+      // Fetch main data and 12-month chart in parallel (2 requests instead of 13)
+      final results = await Future.wait([
+        http.get(Uri.parse(monthlyAccumulatedApiUrl(year: y, month: m))),
+        http.get(Uri.parse(monthlyRollingCasinoByYearApiUrl(y))),
+      ]);
+      final res = results[0];
+      final chartRes = results[1];
       if (res.statusCode != 200) return MonthlyResult.empty();
       final json = _parseJson(res.body);
       if (json == null || json['success'] != true) return MonthlyResult.empty();
@@ -87,8 +92,8 @@ class MonthlyService {
           final first = byRank.first;
           if (first is Map) {
             topCommissionAmount = _int(first['amount']);
-            final name = first['agent_name']?.toString()?.trim();
-            final code = first['agent_code']?.toString()?.trim();
+            final name = first['agent_name']?.toString().trim();
+            final code = first['agent_code']?.toString().trim();
             topCommissionAgentLabel = (name != null && name.isNotEmpty) ? name : (code ?? '');
           }
         }
@@ -97,22 +102,25 @@ class MonthlyService {
       final rollingGames = _int(json['monthly_accumulated_rolling_games']);
       final rollingCasino = _int(json['monthly_accumulated_rolling_casino']);
 
-      // Build last 4 months for casino chart, oldest first (e.g. Jan, Feb, Mar, Apr)
+      // Parse 12 months (Jan–Dec) from single chart response
       final List<MonthlyCasinoRolling> casinoByMonth = [];
-      for (int i = 3; i >= 0; i--) {
-        int mm = m - i;
-        int yy = y;
-        while (mm < 1) {
-          mm += 12;
-          yy--;
+      if (chartRes.statusCode == 200) {
+        final chartJson = _parseJson(chartRes.body);
+        if (chartJson != null && chartJson['success'] == true) {
+          final byMonth = chartJson['by_month'] as List<dynamic>?;
+          if (byMonth != null && byMonth.length >= 12) {
+            for (int i = 0; i < 12; i++) {
+              final entry = byMonth[i];
+              final val = entry is Map ? _int(entry['value']) : 0;
+              casinoByMonth.add(MonthlyCasinoRolling(monthKey: _monthKeys[i], value: val));
+            }
+          }
         }
-        final r = await http.get(Uri.parse(monthlyAccumulatedApiUrl(year: yy, month: mm)));
-        int val = 0;
-        if (r.statusCode == 200) {
-          final j = _parseJson(r.body);
-          if (j != null && j['success'] == true) val = _int(j['monthly_accumulated_rolling_casino']);
+      }
+      if (casinoByMonth.length != 12) {
+        for (int i = casinoByMonth.length; i < 12; i++) {
+          casinoByMonth.add(MonthlyCasinoRolling(monthKey: _monthKeys[i], value: 0));
         }
-        casinoByMonth.add(MonthlyCasinoRolling(monthKey: _monthKeys[mm - 1], value: val));
       }
 
       return MonthlyResult(

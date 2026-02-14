@@ -19,12 +19,12 @@ class RealtimeService {
   Future<RealtimeData> fetchRealtime() async {
     try {
       final res = await http.get(Uri.parse(realtimeApiUrl));
-      if (res.statusCode != 200) return RealtimeData.empty();
+      if (res.statusCode != 200) return const RealtimeData.empty();
       final json = _parseJson(res.body);
-      if (json == null) return RealtimeData.empty();
+      if (json == null) return const RealtimeData.empty();
       return RealtimeData.fromJson(json);
     } catch (_) {
-      return RealtimeData.empty();
+      return const RealtimeData.empty();
     }
   }
 
@@ -48,7 +48,7 @@ class RealtimeService {
     );
     _socket!.on('realtime', (data) {
       try {
-        final map = data is Map ? Map<String, dynamic>.from(data as Map) : _parseJson(data is String ? data as String : '{}');
+        final map = data is Map ? Map<String, dynamic>.from(data) : _parseJson(data is String ? data : '{}');
         if (map != null) _realtimeController.add(RealtimeData.fromJson(map));
       } catch (_) {}
     });

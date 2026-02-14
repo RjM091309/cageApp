@@ -20,9 +20,9 @@ class MarkerService {
       if (list == null) return [];
       return list.map((e) {
         if (e is! Map) return null;
-        final name = e['agent_name']?.toString()?.trim() ?? '';
-        final code = e['agent_code']?.toString()?.trim() ?? '';
-        final agencyName = e['agency_name']?.toString()?.trim() ?? '';
+        final name = e['agent_name']?.toString().trim() ?? '';
+        final code = e['agent_code']?.toString().trim() ?? '';
+        final agencyName = e['agency_name']?.toString().trim() ?? '';
         // Right side: agency name (fallback to name/code if no agency)
         final guest = agencyName.isNotEmpty ? agencyName : (name.isNotEmpty ? name : (code.isNotEmpty ? code : '—'));
         // Left side: "NAME (AGENT CODE)"
