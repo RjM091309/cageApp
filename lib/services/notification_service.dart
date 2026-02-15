@@ -20,19 +20,20 @@ class NotificationService {
     return headers;
   }
 
-  /// Fetches notifications for the executive app. Read state is per user (requires auth).
-  Future<List<NotificationItem>> fetchNotifications() async {
+  /// Fetches notifications with pagination. Returns (list, total). Read state is per user (requires auth).
+  Future<({List<NotificationItem> list, int total})> fetchNotifications({int limit = 20, int offset = 0}) async {
     try {
       final headers = await _authHeaders();
-      final uri = Uri.parse(notificationsApiUrl).replace(queryParameters: {'_': DateTime.now().millisecondsSinceEpoch.toString()});
+      final uri = Uri.parse(notificationsApiUrlWithPagination(limit: limit, offset: offset));
       final res = await http.get(uri, headers: headers);
-      if (res.statusCode == 401) return [];
-      if (res.statusCode != 200) return [];
+      if (res.statusCode == 401) return (list: <NotificationItem>[], total: 0);
+      if (res.statusCode != 200) return (list: <NotificationItem>[], total: 0);
       final json = _parseJson(res.body);
-      if (json == null) return [];
+      if (json == null) return (list: <NotificationItem>[], total: 0);
       final list = json['notifications'] as List<dynamic>?;
-      if (list == null) return [];
-      return list.map((e) {
+      final total = (json['total'] is int) ? json['total'] as int : ((json['total'] is num) ? (json['total'] as num).toInt() : 0);
+      if (list == null) return (list: <NotificationItem>[], total: total);
+      final items = list.map((e) {
         if (e is! Map) return null;
         final id = _int(e['id']);
         final title = e['title']?.toString() ?? '';
@@ -49,8 +50,9 @@ class NotificationService {
           isRead: isRead,
         );
       }).whereType<NotificationItem>().toList();
+      return (list: items, total: total);
     } catch (_) {
-      return [];
+      return (list: <NotificationItem>[], total: 0);
     }
   }
 
@@ -78,6 +80,32 @@ class NotificationService {
         onNotificationsChanged?.call();
         system_notification.showSystemNotification(title: title, body: message);
       }
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Mark all visible notifications as read for this user. Requires auth.
+  Future<bool> markAllAsRead() async {
+    try {
+      final headers = await _authHeaders();
+      final res = await http.post(Uri.parse(notificationsMarkAllReadUrl), headers: headers);
+      final ok = res.statusCode >= 200 && res.statusCode < 300;
+      if (ok) onNotificationsChanged?.call();
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Hide one notification for this user (swipe to dismiss). DELETE /api/notifications/:id. Requires auth.
+  Future<bool> hideNotification(int id) async {
+    try {
+      final headers = await _authHeaders();
+      final res = await http.delete(Uri.parse(notificationHideUrl(id)), headers: headers);
+      final ok = res.statusCode >= 200 && res.statusCode < 300;
+      if (ok) onNotificationsChanged?.call();
       return ok;
     } catch (_) {
       return false;

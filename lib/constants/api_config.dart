@@ -8,7 +8,14 @@ String get realtimeApiUrl => '$apiBaseUrl/api/realtime';
 
 String get notificationsApiUrl => '$apiBaseUrl/api/notifications';
 
+String notificationsApiUrlWithPagination({int limit = 20, int offset = 0}) =>
+    '$apiBaseUrl/api/notifications?limit=$limit&offset=$offset';
+
+String get notificationsMarkAllReadUrl => '$apiBaseUrl/api/notifications/mark-all-read';
+
 String notificationMarkReadUrl(int id) => '$apiBaseUrl/api/notifications/$id';
+
+String notificationHideUrl(int id) => '$apiBaseUrl/api/notifications/$id';
 
 String get socketUrl => apiBaseUrl;
 

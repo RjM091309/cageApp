@@ -12,6 +12,7 @@ import '../services/server_status_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/active_view_scope.dart';
 import '../widgets/drawer_panel.dart';
+import '../widgets/skeleton_box.dart';
 import '../platform_init_stub.dart' if (dart.library.io) '../platform_init_io.dart' as platform_init;
 import 'real_time_view.dart';
 import 'daily_settlement_view.dart';
@@ -58,7 +59,10 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
   bool _isServerOnline = true;
   StreamSubscription<bool>? _serverStatusSub;
   List<NotificationItem> _notifications = [];
+  int _notificationTotal = 0;
   bool _notificationsLoading = false;
+  bool _notificationsLoadingMore = false;
+  static const int _notificationPageSize = 20;
   AuthUser? _currentUser;
   Timer? _notificationPollTimer;
 
@@ -138,32 +142,70 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
     return i >= 0 ? i : 0;
   }
 
-  Future<void> _loadNotifications({bool silent = false}) async {
+  Future<void> _loadNotifications({bool silent = false, bool acceptEmpty = false, bool append = false}) async {
     if (!mounted) return;
     final previousIds = Set<int>.from(_notifications.map((n) => n.id));
-    if (!silent) setState(() => _notificationsLoading = true);
-    final list = await NotificationService.instance.fetchNotifications();
+    final offset = append ? _notifications.length : 0;
+    if (append) {
+      setState(() => _notificationsLoadingMore = true);
+    } else if (!silent) {
+      setState(() => _notificationsLoading = true);
+    }
+    final result = await NotificationService.instance.fetchNotifications(limit: _notificationPageSize, offset: offset);
     if (!mounted) return;
-    // Don't replace with empty on fetch failure so red dot doesn't disappear
-    final nextList = list.isNotEmpty || _notifications.isEmpty ? list : _notifications;
+    final list = result.list;
+    final total = result.total;
+    final nextList = append ? [..._notifications, ...list] : list;
+    if (!acceptEmpty && !append && list.isEmpty && _notifications.isNotEmpty) {
+      setState(() {
+        _notificationsLoading = false;
+        _notificationsLoadingMore = false;
+      });
+      return;
+    }
     final hasNew = nextList.any((n) => !previousIds.contains(n.id));
     final hasNewUnread = hasNew && nextList.any((n) => !previousIds.contains(n.id) && !n.isRead);
     setState(() {
       _notifications = nextList;
+      _notificationTotal = total;
       _notificationsLoading = false;
+      _notificationsLoadingMore = false;
     });
-    // Show sliding toast: slide in from right, stay 3s, slide out to right
-    final shouldShowToast = mounted && hasNewUnread;
-    if (shouldShowToast) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() => _showNotificationToast = true);
-        _toastSlideController.forward();
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) _toastSlideController.reverse();
+    if (!append) {
+      final shouldShowToast = mounted && hasNewUnread;
+      if (shouldShowToast) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() => _showNotificationToast = true);
+          _toastSlideController.forward();
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) _toastSlideController.reverse();
+          });
         });
+      }
+    }
+  }
+
+  Future<void> _markAllNotificationsAsRead() async {
+    final ok = await NotificationService.instance.markAllAsRead();
+    if (!mounted) return;
+    if (ok) await _loadNotifications();
+  }
+
+  Future<void> _hideNotification(int id) async {
+    final ok = await NotificationService.instance.hideNotification(id);
+    if (!mounted) return;
+    if (ok) {
+      setState(() {
+        _notifications = _notifications.where((n) => n.id != id).toList();
+        _notificationTotal = (_notificationTotal - 1).clamp(0, 0x7fffffff);
       });
     }
+  }
+
+  Future<void> _loadMoreNotifications() async {
+    if (_notificationsLoadingMore || _notifications.length >= _notificationTotal) return;
+    await _loadNotifications(silent: true, append: true);
   }
 
   Widget _buildNotificationToast(BuildContext context) {
@@ -221,7 +263,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
   Future<void> _clearAllNotifications() async {
     final ok = await NotificationService.instance.clearAll();
     if (!mounted) return;
-    if (ok) await _loadNotifications();
+    if (ok) await _loadNotifications(acceptEmpty: true);
   }
 
   Future<void> _markNotificationAsRead(NotificationItem n) async {
@@ -469,15 +511,16 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
               child: DrawerPanel(
               title: AppLocalizations.of(context).notifications,
               onClose: () => setState(() => _notificationOpen = false),
-              child: Column(
+              child: ClipRect(
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (_notificationsLoading)
-                    Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Center(child: CircularProgressIndicator(color: primaryIndigo)),
-                    )
+                    ...List.generate(5, (_) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _skeletonNotificationCard(),
+                    ))
                   else ...[
                     if (_notifications.isEmpty)
                       Padding(
@@ -492,69 +535,110 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                     else
                       ..._notifications.map((n) => Padding(
                             padding: const EdgeInsets.only(bottom: 16),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () => _markNotificationAsRead(n),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: cardBg,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: borderColor),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              if (!n.isRead)
-                                                Padding(
-                                                  padding: const EdgeInsets.only(right: 8),
-                                                  child: Container(
-                                                    width: 8,
-                                                    height: 8,
-                                                    decoration: BoxDecoration(
-                                                      color: roseAccent,
-                                                      shape: BoxShape.circle,
+                            child: Dismissible(
+                              key: ValueKey<int>(n.id),
+                              direction: DismissDirection.endToStart,
+                              onDismissed: (_) => _hideNotification(n.id),
+                              background: Container(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                decoration: BoxDecoration(
+                                  color: roseAccent.withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: borderColor),
+                                ),
+                                child: const Icon(Icons.delete_outline, color: Colors.white70, size: 24),
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () => _markNotificationAsRead(n),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: cardBg,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: borderColor),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                if (!n.isRead)
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(right: 8),
+                                                    child: Container(
+                                                      width: 8,
+                                                      height: 8,
+                                                      decoration: BoxDecoration(
+                                                        color: roseAccent,
+                                                        shape: BoxShape.circle,
+                                                      ),
                                                     ),
                                                   ),
+                                                Text(
+                                                  n.title,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: _notificationTitleColor(n),
+                                                  ),
                                                 ),
-                                              Text(
-                                                n.title,
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: _notificationTitleColor(n.type),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Text(n.time, style: TextStyle(fontSize: 9, color: Colors.grey[500])),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _buildNotificationMessage(n.message),
-                                    ],
+                                              ],
+                                            ),
+                                            Text(n.time, style: TextStyle(fontSize: 9, color: Colors.grey[500])),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        _buildNotificationMessage(n.message),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           )),
-                    if (_notifications.isNotEmpty)
-                      TextButton(
-                        onPressed: _clearAllNotifications,
-                        child: Text(
-                          AppLocalizations.of(context).clearAllNotifications,
-                          style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    if (_notifications.length < _notificationTotal && _notifications.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Center(
+                          child: TextButton(
+                            onPressed: _notificationsLoadingMore ? null : _loadMoreNotifications,
+                            child: _notificationsLoadingMore
+                                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: primaryIndigo))
+                                : Text(AppLocalizations.of(context).loadMore, style: TextStyle(fontSize: 12, color: primaryIndigo)),
+                          ),
                         ),
+                      ),
+                    if (_notifications.isNotEmpty)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: _markAllNotificationsAsRead,
+                            child: Text(
+                              AppLocalizations.of(context).markAllAsRead,
+                              style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                            ),
+                          ),
+                          Text('·', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                          TextButton(
+                            onPressed: _clearAllNotifications,
+                            child: Text(
+                              AppLocalizations.of(context).clearAllNotifications,
+                              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                            ),
+                          ),
+                        ],
                       ),
                   ],
                 ],
+              ),
               ),
               ),
               ),
@@ -655,8 +739,44 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
     );
   }
 
-  Color _notificationTitleColor(String type) {
+  Widget _skeletonNotificationCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SkeletonBox(width: 120, height: 12, borderRadius: 4),
+              const SkeletonBox(width: 48, height: 9, borderRadius: 4),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const SkeletonBox(height: 11, width: double.infinity, borderRadius: 4),
+          const SizedBox(height: 4),
+          const SkeletonBox(height: 11, width: 200, borderRadius: 4),
+        ],
+      ),
+    );
+  }
+
+  Color _notificationTitleColor(NotificationItem n) {
+    final type = n.type;
     switch (type) {
+      case 'game_start':
+        return emeraldAccent;
+      case 'buy_in':
+        return amberAccent;
+      case 'cash_out':
+        return tealAccent;
+      case 'game_ended':
+        return accentPurple;
       case 'urgent':
         return roseAccent;
       case 'success':
@@ -664,6 +784,12 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       case 'warning':
         return amberAccent;
       default:
+        // Fallback by title for old notifications with type 'info'
+        final t = n.title.toLowerCase();
+        if (t.contains('game started') || t.contains('new game')) return emeraldAccent;
+        if (t.contains('buy-in added') || t.contains('buy in added')) return amberAccent;
+        if (t.contains('cash-out added') || t.contains('cash out added')) return tealAccent;
+        if (t.contains('game ended') || t.contains('has ended')) return accentPurple;
         return primaryIndigo;
     }
   }
@@ -678,7 +804,8 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
     }
     final before = message.substring(0, idx);
     final winLossPart = message.substring(idx + _winLossPrefix.length);
-    final isNegative = winLossPart.trim().startsWith('-') || winLossPart.contains('−');
+    final trimmed = winLossPart.trim();
+    final isNegative = trimmed.startsWith('-') || trimmed.contains('−') || trimmed.startsWith('P-') || trimmed.startsWith('₱-');
     final winLossColor = isNegative ? roseAccent : emeraldAccent;
     return RichText(
       text: TextSpan(

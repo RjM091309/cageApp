@@ -51,6 +51,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get clearAllNotifications => '모든 알림 지우기';
 
   @override
+  String get markAllAsRead => '모두 읽음으로 표시';
+
+  @override
+  String get loadMore => '더 보기';
+
+  @override
   String get newActivityCheckNotifications => '새 활동이 있습니다 — 알림을 확인하세요';
 
   @override
