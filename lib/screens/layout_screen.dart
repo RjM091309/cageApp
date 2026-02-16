@@ -12,6 +12,7 @@ import '../services/server_status_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/active_view_scope.dart';
 import '../widgets/drawer_panel.dart';
+import '../widgets/profile_panel.dart';
 import '../widgets/skeleton_box.dart';
 import '../platform_init_stub.dart' if (dart.library.io) '../platform_init_io.dart' as platform_init;
 import 'real_time_view.dart';
@@ -85,8 +86,10 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
     // Load notifications on start so red dot shows for unread without opening panel first
     _loadNotifications();
     // Poll every 2s on other tabs. On Real Time tab, notifications are synced with ongoing games via RealTimeView.onPollTick (same 3s).
-    _notificationPollTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      if (mounted && _activeView != ViewType.realTime) _loadNotifications(silent: true);
+    _notificationPollTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+      if (!mounted || _activeView == ViewType.realTime) return;
+      final enabled = await AuthService.instance.getNotificationsEnabled();
+      if (mounted && enabled) _loadNotifications(silent: true);
     });
     _pageController = PageController(initialPage: 0);
     _contentTransitionController = AnimationController(
@@ -120,7 +123,9 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       platform_init.scheduleOneOffNotificationCheck();
     } else if (state == AppLifecycleState.resumed && mounted) {
-      _loadNotifications();
+      AuthService.instance.getNotificationsEnabled().then((enabled) {
+        if (mounted && enabled) _loadNotifications();
+      });
     }
   }
 
@@ -172,7 +177,8 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       _notificationsLoadingMore = false;
     });
     if (!append) {
-      final shouldShowToast = mounted && hasNewUnread;
+      final notificationsEnabled = await AuthService.instance.getNotificationsEnabled();
+      final shouldShowToast = mounted && hasNewUnread && notificationsEnabled;
       if (shouldShowToast) {
         SchedulerBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -644,64 +650,12 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
               ),
             if (_profileOpen)
               Positioned.fill(
-              child: DrawerPanel(
-              title: AppLocalizations.of(context).executiveAccount,
-              onClose: () => setState(() => _profileOpen = false),
-              child: Builder(
-                builder: (context) {
-                  final l10n = AppLocalizations.of(context);
-                  final user = _currentUser;
-                  return Column(
-                    children: [
-                      CircleAvatar(radius: 40, backgroundColor: primaryIndigo, child: const Icon(Icons.person, size: 36, color: Colors.white)),
-                      const SizedBox(height: 16),
-                      Text(user?.displayName ?? l10n.bossExecutive, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                      const SizedBox(height: 4),
-                      Text(user?.permissions == 1 ? l10n.administrator : (user?.role ?? l10n.adminAccessLevel1), style: TextStyle(fontSize: 12, color: emeraldAccent, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 24),
-                      _profileTile(Icons.settings, l10n.systemSettings, l10n.preferencesConfig),
-                      _profileTile(Icons.security, l10n.securityPrivacy, l10n.keysAuthorization),
-                      _profileTile(Icons.history, l10n.auditLogs, l10n.sessionHistory),
-                      _profileTile(Icons.help_outline, l10n.supportCenter, l10n.documentation),
-                      const SizedBox(height: 24),
-                      const Divider(color: Colors.white12),
-                      ListTile(
-                        leading: Icon(Icons.logout, color: roseAccent, size: 20),
-                        title: Text(l10n.logOut, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                        subtitle: Text(l10n.terminateSession, style: TextStyle(fontSize: 10, color: roseAccent.withValues(alpha: 0.8))),
-                        onTap: () async {
-                          setState(() => _profileOpen = false);
-                          await AuthService.instance.logout();
-                          if (!mounted) return;
-                          widget.onLogout?.call();
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: borderColor)),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: primaryIndigo, size: 20),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(l10n.securityNote, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[300])),
-                                  Text(l10n.lastLoginFromIp('192.168.1.45'), style: TextStyle(fontSize: 10, color: Colors.grey[500], fontStyle: FontStyle.italic)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                child: ProfilePanel(
+                  onClose: () => setState(() => _profileOpen = false),
+                  onLogout: () => widget.onLogout?.call(),
+                  currentUser: _currentUser,
+                ),
               ),
-            ),
-            ),
             if (_showNotificationToast) _buildNotificationToast(context),
           ],
         ),
@@ -818,20 +772,6 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
           ),
         ],
       ),
-    );
-  }
-
-  Widget _profileTile(IconData icon, String label, String sub) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, size: 18, color: Colors.grey),
-      ),
-      title: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
-      subtitle: Text(sub, style: TextStyle(fontSize: 10, color: Colors.grey[500])),
-      trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
-      onTap: () {},
     );
   }
 

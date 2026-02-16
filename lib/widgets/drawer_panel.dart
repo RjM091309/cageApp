@@ -5,6 +5,8 @@ class DrawerPanel extends StatelessWidget {
   final String title;
   final VoidCallback onClose;
   final Widget child;
+  /// Optional widget fixed at the bottom of the panel (e.g. Log out).
+  final Widget? bottomChild;
   /// When true, panel slides in from the left; otherwise from the right.
   final bool fromLeft;
 
@@ -13,6 +15,7 @@ class DrawerPanel extends StatelessWidget {
     required this.title,
     required this.onClose,
     required this.child,
+    this.bottomChild,
     this.fromLeft = false,
   });
 
@@ -76,6 +79,7 @@ class DrawerPanel extends StatelessWidget {
                           child: child,
                         ),
                       ),
+                      if (bottomChild != null) bottomChild!,
                     ],
                   ),
                 ),

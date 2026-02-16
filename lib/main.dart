@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -8,6 +9,7 @@ import 'platform_init_stub.dart' if (dart.library.io) 'platform_init_io.dart' as
 import 'screens/layout_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
+import 'services/biometric_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -102,6 +104,8 @@ class _AuthGate extends StatefulWidget {
 class _AuthGateState extends State<_AuthGate> {
   bool _loading = true;
   bool _isLoggedIn = false;
+  bool _pendingFingerprint = false;
+  bool _attemptingFingerprint = false;
 
   Future<void> _checkAuth() async {
     final token = await AuthService.instance.getToken();
@@ -112,10 +116,55 @@ class _AuthGateState extends State<_AuthGate> {
       }
     }
     final tokenAfter = await AuthService.instance.getToken();
+    if (tokenAfter != null && tokenAfter.isNotEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _isLoggedIn = true;
+        _loading = false;
+      });
+      return;
+    }
+    final fingerprintEnabled = await AuthService.instance.getFingerprintEnabled();
+    final username = await AuthService.instance.getSavedUsername();
+    final password = await AuthService.instance.getSavedPassword();
+    final canTryFingerprint = BiometricService.instance.isSupportedPlatform;
+    final shouldTryFingerprint = fingerprintEnabled &&
+        username.isNotEmpty &&
+        password.isNotEmpty &&
+        canTryFingerprint;
     if (!mounted) return;
     setState(() {
-      _isLoggedIn = tokenAfter != null && tokenAfter.isNotEmpty;
       _loading = false;
+      _pendingFingerprint = shouldTryFingerprint;
+    });
+  }
+
+  Future<void> _tryFingerprintLogin() async {
+    if (!mounted) return;
+    final reason = AppLocalizations.of(context).fingerprintReason;
+    // Let the first frame and activity settle so Android can show BiometricPrompt
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+    // Wake up biometric stack on some devices
+    await BiometricService.instance.getAvailableBiometrics();
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+    final result = await BiometricService.instance.authenticate(
+      reason: reason,
+      biometricOnly: false,
+    );
+    if (!mounted) return;
+    if (result != BiometricAuthResult.success) {
+      setState(() => _attemptingFingerprint = false);
+      return;
+    }
+    final username = await AuthService.instance.getSavedUsername();
+    final password = await AuthService.instance.getSavedPassword();
+    final user = await AuthService.instance.login(username: username, password: password);
+    if (!mounted) return;
+    setState(() {
+      _attemptingFingerprint = false;
+      if (user != null && user.permissions == 1) _isLoggedIn = true;
     });
   }
 
@@ -135,12 +184,29 @@ class _AuthGateState extends State<_AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
+    if (_pendingFingerprint) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _pendingFingerprint = false;
+          _attemptingFingerprint = true;
+        });
+        _tryFingerprintLogin();
+      });
+    }
+    if (_loading || _pendingFingerprint || _attemptingFingerprint) {
       return Scaffold(
         body: Container(
+          width: double.infinity,
+          height: double.infinity,
           decoration: BoxDecoration(gradient: scaffoldGradient),
           child: Center(
-            child: CircularProgressIndicator(color: primaryIndigo),
+            child: Image.asset(
+              'assets/images/login.png',
+              fit: BoxFit.contain,
+              width: 280,
+              errorBuilder: (_, __, ___) => CircularProgressIndicator(color: primaryIndigo),
+            ),
           ),
         ),
       );

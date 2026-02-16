@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import '../services/biometric_service.dart' show BiometricService, BiometricAuthResult;
 import '../generated/app_localizations.dart';
 import '../main.dart';
 import '../widgets/drawer_panel.dart';
@@ -21,7 +22,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _loading = false;
   bool _rememberMe = false;
+  bool _useFingerprint = false;
   bool _languageOpen = false;
+  bool _biometricAvailable = false;
+  bool _fingerprintEnabled = false;
   String? _errorMessage;
 
   @override
@@ -32,14 +36,24 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loadSavedLogin() async {
     final remember = await AuthService.instance.getRememberMe();
-    if (!remember) return;
+    final fingerprintOn = await AuthService.instance.getFingerprintEnabled();
     final username = await AuthService.instance.getSavedUsername();
     final password = await AuthService.instance.getSavedPassword();
+    final hasSavedLogin = remember && username.isNotEmpty && password.isNotEmpty;
+    // Use both checks: some devices report empty getAvailableBiometrics() even when
+    // fingerprint is set up for lock screen; isDeviceSupported() helps on those.
+    final hasEnrolled = await BiometricService.instance.hasBiometricEnrolled();
+    final deviceSupported = await BiometricService.instance.isDeviceSupported();
+    final hasBiometric = hasEnrolled || deviceSupported;
     if (!mounted) return;
     setState(() {
-      _rememberMe = true;
-      if (username.isNotEmpty) _usernameController.text = username;
-      if (password.isNotEmpty) _passwordController.text = password;
+      _rememberMe = hasSavedLogin;
+      _useFingerprint = fingerprintOn && hasBiometric;
+      // Show fingerprint button when we have saved login and device supports biometric.
+      _fingerprintEnabled = hasBiometric && hasSavedLogin;
+      _biometricAvailable = hasBiometric;
+      if (_rememberMe && username.isNotEmpty) _usernameController.text = username;
+      if (_rememberMe && password.isNotEmpty) _passwordController.text = password;
     });
   }
 
@@ -48,6 +62,54 @@ class _LoginScreenState extends State<LoginScreen> {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loginWithFingerprint() async {
+    final username = await AuthService.instance.getSavedUsername();
+    final password = await AuthService.instance.getSavedPassword();
+    if (username.isEmpty || password.isEmpty) return;
+    if (!mounted) return;
+    setState(() => _errorMessage = null);
+    final reason = AppLocalizations.of(context).fingerprintReason;
+    // Give the activity time to be ready so Android BiometricPrompt can attach (same as main.dart flow)
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    // Wake up biometric stack on some devices before showing the prompt
+    await BiometricService.instance.getAvailableBiometrics();
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    if (!mounted) return;
+    final result = await BiometricService.instance.authenticate(
+      reason: reason,
+      biometricOnly: false,
+    );
+    if (!mounted) return;
+    if (result != BiometricAuthResult.success) {
+      if (result == BiometricAuthResult.cancelled) return;
+      final l10n = AppLocalizations.of(context);
+      setState(() {
+        _errorMessage = result == BiometricAuthResult.notAvailable
+            ? l10n.fingerprintNotAvailable
+            : l10n.fingerprintTryAgain;
+      });
+      return;
+    }
+    setState(() {
+      _errorMessage = null;
+      _loading = true;
+    });
+    final user = await AuthService.instance.login(username: username, password: password);
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    if (user != null && user.permissions == 1) {
+      widget.onLoginSuccess();
+    } else {
+      await AuthService.instance.clearRememberMe();
+      setState(() {
+        _errorMessage = user == null ? l10n.errorInvalidCredentials : l10n.errorAdminOnlyAccess;
+        _loading = false;
+        _fingerprintEnabled = false;
+      });
+    }
   }
 
   Future<void> _submit() async {
@@ -78,6 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       if (_rememberMe) {
         await AuthService.instance.saveRememberMe(username: username, password: password);
+        await AuthService.instance.setFingerprintEnabled(_useFingerprint);
       } else {
         await AuthService.instance.clearRememberMe();
       }
@@ -192,6 +255,37 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 20),
                             ],
+                            if (_fingerprintEnabled && !_loading) ...[
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: Colors.white.withValues(alpha: 0.08),
+                                  border: Border.all(color: primaryIndigo.withValues(alpha: 0.5), width: 1.2),
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: _loginWithFingerprint,
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.fingerprint, size: 28, color: primaryIndigo),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            AppLocalizations.of(context).signInWithFingerprint,
+                                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
                             TextFormField(
                               controller: _usernameController,
                               decoration: InputDecoration(
@@ -239,12 +333,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               onFieldSubmitted: (_) => _submit(),
                             ),
                             const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     SizedBox(
                                       height: 24,
@@ -275,26 +367,65 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ],
                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    color: Colors.white.withValues(alpha: 0.08),
-                                    border: Border.all(color: primaryIndigo.withValues(alpha: 0.5), width: 1.2),
+                                if (_biometricAvailable && _rememberMe) ...[
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: Checkbox(
+                                          value: _useFingerprint,
+                                          onChanged: _loading
+                                              ? null
+                                              : (v) => setState(() => _useFingerprint = v ?? false),
+                                          activeColor: primaryIndigo,
+                                          checkColor: Colors.white,
+                                          fillColor: WidgetStateProperty.resolveWith((states) {
+                                            if (states.contains(WidgetState.selected)) return primaryIndigo;
+                                            return Colors.white.withValues(alpha: 0.2);
+                                          }),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      GestureDetector(
+                                        onTap: _loading
+                                            ? null
+                                            : () => setState(() => _useFingerprint = !_useFingerprint),
+                                        child: Text(
+                                          AppLocalizations.of(context).useFingerprint,
+                                          style: TextStyle(fontSize: 13, color: Colors.grey[400]),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: _loading ? null : () => _submit(),
+                                ],
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Container(
+                                    decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(14),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 32),
-                                        child: _loading
-                                            ? const SizedBox(
-                                                height: 22,
-                                                width: 22,
-                                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                              )
-                                            : Text(AppLocalizations.of(context).signIn, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                                      color: Colors.white.withValues(alpha: 0.08),
+                                      border: Border.all(color: primaryIndigo.withValues(alpha: 0.5), width: 1.2),
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: _loading ? null : () => _submit(),
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                                          alignment: Alignment.center,
+                                          child: _loading
+                                              ? const SizedBox(
+                                                  height: 22,
+                                                  width: 22,
+                                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                                )
+                                              : Text(AppLocalizations.of(context).signIn, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                                        ),
                                       ),
                                     ),
                                   ),

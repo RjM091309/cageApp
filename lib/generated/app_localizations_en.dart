@@ -334,4 +334,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorAdminOnlyAccess => 'Only administrators can access this app.';
+
+  @override
+  String get useFingerprint => 'Use fingerprint to sign in';
+
+  @override
+  String get signInWithFingerprint => 'Sign in with fingerprint';
+
+  @override
+  String get fingerprintReason => 'Sign in to Infinity Cage X';
+
+  @override
+  String get fingerprintNotAvailable =>
+      'Fingerprint is not available on this device.';
+
+  @override
+  String get fingerprintTryAgain =>
+      'Fingerprint sign-in didn\'t complete. Please try again.';
+
+  @override
+  String get fingerprintSetupHint =>
+      'On Android, add a fingerprint in Settings > Security. It won\'t appear in app permissions.';
+
+  @override
+  String get enableFingerprintNextTime => 'Use fingerprint next time?';
+
+  @override
+  String get receiveNotifications => 'Receive notifications';
 }

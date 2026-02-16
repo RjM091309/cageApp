@@ -332,4 +332,29 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get errorAdminOnlyAccess => '관리자만 이 앱에 접근할 수 있습니다.';
+
+  @override
+  String get useFingerprint => '지문으로 로그인';
+
+  @override
+  String get signInWithFingerprint => '지문으로 로그인';
+
+  @override
+  String get fingerprintReason => 'Infinity Cage X에 로그인';
+
+  @override
+  String get fingerprintNotAvailable => '이 기기에서는 지문을 사용할 수 없습니다.';
+
+  @override
+  String get fingerprintTryAgain => '지문 로그인이 완료되지 않았습니다. 다시 시도해 주세요.';
+
+  @override
+  String get fingerprintSetupHint =>
+      'Android에서는 설정 > 보안에서 지문을 등록하세요. 앱 권한 목록에는 표시되지 않습니다.';
+
+  @override
+  String get enableFingerprintNextTime => '다음에 지문으로 로그인할까요?';
+
+  @override
+  String get receiveNotifications => '알림 받기';
 }

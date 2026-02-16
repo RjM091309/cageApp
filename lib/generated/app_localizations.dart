@@ -739,6 +739,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only administrators can access this app.'**
   String get errorAdminOnlyAccess;
+
+  /// No description provided for @useFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint to sign in'**
+  String get useFingerprint;
+
+  /// No description provided for @signInWithFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with fingerprint'**
+  String get signInWithFingerprint;
+
+  /// No description provided for @fingerprintReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Infinity Cage X'**
+  String get fingerprintReason;
+
+  /// No description provided for @fingerprintNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint is not available on this device.'**
+  String get fingerprintNotAvailable;
+
+  /// No description provided for @fingerprintTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint sign-in didn\'t complete. Please try again.'**
+  String get fingerprintTryAgain;
+
+  /// No description provided for @fingerprintSetupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On Android, add a fingerprint in Settings > Security. It won\'t appear in app permissions.'**
+  String get fingerprintSetupHint;
+
+  /// No description provided for @enableFingerprintNextTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint next time?'**
+  String get enableFingerprintNextTime;
+
+  /// No description provided for @receiveNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive notifications'**
+  String get receiveNotifications;
 }
 
 class _AppLocalizationsDelegate

@@ -39,11 +39,15 @@ class AuthService {
   static const _keyRememberMe = 'remember_me';
   static const _keySavedUsername = 'saved_username';
   static const _keySavedPassword = 'saved_password';
+  static const _keyFingerprintEnabled = 'fingerprint_enabled';
+  static const _keyNotificationsEnabled = 'notifications_enabled';
 
-  /// Returns stored token or null.
+  /// Token in memory only so that when app is killed, session is expired (back to login + fingerprint).
+  String? _token;
+
+  /// Returns current token or null. Not persisted — session expires when app process is killed.
   Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyToken);
+    return _token;
   }
 
   /// Returns stored user or null.
@@ -89,8 +93,8 @@ class AuthService {
         permissions: _int(userMap['permissions']),
         role: (userMap['role']?.toString() ?? '').trim().isEmpty ? 'User' : (userMap['role']?.toString() ?? 'User').trim(),
       );
+      _token = token;
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyToken, token);
       await prefs.setString(_keyUser, jsonEncode({
         'username': user.username,
         'firstname': user.firstname,
@@ -107,6 +111,7 @@ class AuthService {
 
   /// Clear stored auth (logout).
   Future<void> logout() async {
+    _token = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyToken);
     await prefs.remove(_keyUser);
@@ -126,6 +131,7 @@ class AuthService {
     await prefs.setBool(_keyRememberMe, false);
     await prefs.remove(_keySavedUsername);
     await prefs.remove(_keySavedPassword);
+    await clearFingerprintEnabled();
   }
 
   /// Whether "Remember me" was last enabled.
@@ -144,6 +150,36 @@ class AuthService {
   Future<String> getSavedPassword() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keySavedPassword) ?? '';
+  }
+
+  /// Whether fingerprint login was enabled by the user.
+  Future<bool> getFingerprintEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyFingerprintEnabled) ?? false;
+  }
+
+  /// Enable or disable fingerprint login. Only meaningful when Remember me has credentials saved.
+  Future<void> setFingerprintEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyFingerprintEnabled, enabled);
+  }
+
+  /// Clear fingerprint preference (e.g. when clearing remember me).
+  Future<void> clearFingerprintEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyFingerprintEnabled);
+  }
+
+  /// Whether the user wants to receive notifications. Defaults to true.
+  Future<bool> getNotificationsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyNotificationsEnabled) ?? true;
+  }
+
+  /// Enable or disable receiving notifications (toasts, etc.).
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyNotificationsEnabled, enabled);
   }
 
   int _int(dynamic v) {
