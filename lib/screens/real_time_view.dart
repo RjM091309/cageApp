@@ -346,16 +346,16 @@ class _RealTimeViewState extends State<RealTimeView> {
                   color: StatCardColor.brown,
                 ),
                 StatCard(
-                  label: l10n.netJunketMoney,
-                  value: _fmt.format(_data.netJunketMoney),
-                  icon: Icons.account_balance,
-                  color: StatCardColor.amber,
-                ),
-                StatCard(
                   label: l10n.netJunketCash,
                   value: _fmt.format(_data.netJunketCash),
                   icon: Icons.account_balance_wallet,
                   color: StatCardColor.rose,
+                ),
+                StatCard(
+                  label: l10n.netJunketMoney,
+                  value: _fmt.format(_data.netJunketMoney),
+                  icon: Icons.account_balance,
+                  color: StatCardColor.amber,
                 ),
                 StatCard(
                   label: l10n.guestBalance,
