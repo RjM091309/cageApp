@@ -587,13 +587,13 @@ abstract class AppLocalizations {
   /// No description provided for @netJunketMoney.
   ///
   /// In en, this message translates to:
-  /// **'Net Junket Cash'**
+  /// **'Net Junket Money'**
   String get netJunketMoney;
 
   /// No description provided for @netJunketCash.
   ///
   /// In en, this message translates to:
-  /// **'Net Junket Money'**
+  /// **'Net Junket Cash'**
   String get netJunketCash;
 
   /// No description provided for @ongoingGames.

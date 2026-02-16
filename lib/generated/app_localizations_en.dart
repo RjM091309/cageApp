@@ -258,10 +258,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guestBalance => 'Guest Balance';
 
   @override
-  String get netJunketMoney => 'Net Junket Cash';
+  String get netJunketMoney => 'Net Junket Money';
 
   @override
-  String get netJunketCash => 'Net Junket Money';
+  String get netJunketCash => 'Net Junket Cash';
 
   @override
   String get ongoingGames => 'On Going Game';
