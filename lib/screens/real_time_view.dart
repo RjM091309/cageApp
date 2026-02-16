@@ -346,12 +346,6 @@ class _RealTimeViewState extends State<RealTimeView> {
                   color: StatCardColor.brown,
                 ),
                 StatCard(
-                  label: l10n.guestBalance,
-                  value: _fmt.format(_data.guestBalance),
-                  icon: Icons.people,
-                  color: StatCardColor.purple,
-                ),
-                StatCard(
                   label: l10n.netJunketMoney,
                   value: _fmt.format(_data.netJunketMoney),
                   icon: Icons.account_balance,
@@ -362,6 +356,12 @@ class _RealTimeViewState extends State<RealTimeView> {
                   value: _fmt.format(_data.netJunketCash),
                   icon: Icons.account_balance_wallet,
                   color: StatCardColor.rose,
+                ),
+                StatCard(
+                  label: l10n.guestBalance,
+                  value: _fmt.format(_data.guestBalance),
+                  icon: Icons.people,
+                  color: StatCardColor.purple,
                 ),
               ],
             );
