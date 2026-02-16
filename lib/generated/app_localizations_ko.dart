@@ -256,10 +256,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get guestBalance => '게스트 밸런스';
 
   @override
-  String get netJunketMoney => '순 정캣 현금';
+  String get netJunketMoney => '순 정캣 자산';
 
   @override
-  String get netJunketCash => '순 정캣 자산';
+  String get netJunketCash => '순 정캣 현금';
 
   @override
   String get ongoingGames => '진행중인 게임';
