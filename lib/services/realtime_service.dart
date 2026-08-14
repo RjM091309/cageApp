@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../constants/api_config.dart';
+import '../models/expense_breakdown.dart';
 import '../models/realtime_data.dart';
 
 class RealtimeService {
@@ -25,6 +26,18 @@ class RealtimeService {
       return RealtimeData.fromJson(json);
     } catch (_) {
       return const RealtimeData.empty();
+    }
+  }
+
+  Future<ExpenseBreakdown> fetchExpenseBreakdown() async {
+    try {
+      final res = await http.get(Uri.parse(expenseBreakdownApiUrl));
+      if (res.statusCode != 200) return const ExpenseBreakdown.empty();
+      final json = _parseJson(res.body);
+      if (json == null) return const ExpenseBreakdown.empty();
+      return ExpenseBreakdown.fromJson(json);
+    } catch (_) {
+      return const ExpenseBreakdown.empty();
     }
   }
 

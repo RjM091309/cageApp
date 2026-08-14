@@ -53,6 +53,23 @@
   "rankAgentDragon": "Rank #1 - Agent Dragon",
   "accumulatedExpenses": "Monthly Expenses",
   "mtdExpenditure": "MTD Expenditure",
+  "statisticsLabel": "Statistics",
+  "ngrLabel": "NGR",
+  "winLossLabel": "Win/Loss",
+  "totalCommissionLabel": "Total Commission",
+  "gameCommissionLabel": "Game Commission",
+  "additionalCommissionLabel": "Additional Commission",
+  "expensesLabel": "Expenses",
+  "cageRollingLabel": "Cage Rolling",
+  "casinoRollingLabel": "Casino Rolling",
+  "shareLabel": "Share",
+  "noDataYet": "No data yet",
+  "commissionLabel": "Commission",
+  "settledGameLabel": "Settled Game",
+  "guestLabel": "Guest",
+  "todayLabel": "Today",
+  "yesterdayLabel": "Yesterday",
+  "noOngoingGames": "No ongoing games",
   "gamesRolling": "Monthly Rolling",
   "total": "Total",
   "totalRolling": "Total Rolling",
@@ -99,6 +116,18 @@
   "netJunketCash": "Net Junket Cash",
   "ongoingGames": "On Going Game",
   "live": "LIVE",
+  "expenseBreakdown": "Expense Breakdown",
+  "selectedTotal": "Selected total",
+  "ofGrandTotal": "{percent}% of grand total",
+  "@ofGrandTotal": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "noExpensesToday": "No expenses today",
+  "thisMonth": "This Month",
   "account": "Account",
   "table": "Table",
   "gameType": "Game Type",

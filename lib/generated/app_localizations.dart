@@ -332,6 +332,108 @@ abstract class AppLocalizations {
   /// **'MTD Expenditure'**
   String get mtdExpenditure;
 
+  /// No description provided for @statisticsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statisticsLabel;
+
+  /// No description provided for @ngrLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'NGR'**
+  String get ngrLabel;
+
+  /// No description provided for @winLossLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Win/Loss'**
+  String get winLossLabel;
+
+  /// No description provided for @totalCommissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Commission'**
+  String get totalCommissionLabel;
+
+  /// No description provided for @gameCommissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Game Commission'**
+  String get gameCommissionLabel;
+
+  /// No description provided for @additionalCommissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Commission'**
+  String get additionalCommissionLabel;
+
+  /// No description provided for @expensesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get expensesLabel;
+
+  /// No description provided for @cageRollingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cage Rolling'**
+  String get cageRollingLabel;
+
+  /// No description provided for @casinoRollingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Casino Rolling'**
+  String get casinoRollingLabel;
+
+  /// No description provided for @shareLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareLabel;
+
+  /// No description provided for @noDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get noDataYet;
+
+  /// No description provided for @commissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission'**
+  String get commissionLabel;
+
+  /// No description provided for @settledGameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled Game'**
+  String get settledGameLabel;
+
+  /// No description provided for @guestLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guestLabel;
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayLabel;
+
+  /// No description provided for @yesterdayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterdayLabel;
+
+  /// No description provided for @noOngoingGames.
+  ///
+  /// In en, this message translates to:
+  /// **'No ongoing games'**
+  String get noOngoingGames;
+
   /// No description provided for @gamesRolling.
   ///
   /// In en, this message translates to:
@@ -607,6 +709,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'LIVE'**
   String get live;
+
+  /// No description provided for @expenseBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Breakdown'**
+  String get expenseBreakdown;
+
+  /// No description provided for @selectedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected total'**
+  String get selectedTotal;
+
+  /// No description provided for @ofGrandTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of grand total'**
+  String ofGrandTotal(String percent);
+
+  /// No description provided for @noExpensesToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses today'**
+  String get noExpensesToday;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get thisMonth;
 
   /// No description provided for @account.
   ///

@@ -1,10 +1,21 @@
 
 
-const String apiBaseUrl = 'https://infinitycage.3core21.com';
+const String apiBaseUrl = 'https://infcage.3core21.com';
 
 String get loginApiUrl => '$apiBaseUrl/api/auth/login';
 
 String get realtimeApiUrl => '$apiBaseUrl/api/realtime';
+
+String get expenseBreakdownApiUrl => '$apiBaseUrl/api/expense_breakdown';
+
+String get dashboardSummaryApiUrl => '$apiBaseUrl/api/dashboard-summary';
+
+String monthlyStatisticsApiUrl({int? year}) {
+  final y = year ?? DateTime.now().year;
+  return '$apiBaseUrl/api/monthly-statistics?year=$y';
+}
+
+String get monthlyGamesApiUrl => '$apiBaseUrl/api/monthly-games';
 
 String get notificationsApiUrl => '$apiBaseUrl/api/notifications';
 

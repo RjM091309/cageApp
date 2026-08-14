@@ -131,6 +131,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mtdExpenditure => 'MTD Expenditure';
 
   @override
+  String get statisticsLabel => 'Statistics';
+
+  @override
+  String get ngrLabel => 'NGR';
+
+  @override
+  String get winLossLabel => 'Win/Loss';
+
+  @override
+  String get totalCommissionLabel => 'Total Commission';
+
+  @override
+  String get gameCommissionLabel => 'Game Commission';
+
+  @override
+  String get additionalCommissionLabel => 'Additional Commission';
+
+  @override
+  String get expensesLabel => 'Expenses';
+
+  @override
+  String get cageRollingLabel => 'Cage Rolling';
+
+  @override
+  String get casinoRollingLabel => 'Casino Rolling';
+
+  @override
+  String get shareLabel => 'Share';
+
+  @override
+  String get noDataYet => 'No data yet';
+
+  @override
+  String get commissionLabel => 'Commission';
+
+  @override
+  String get settledGameLabel => 'Settled Game';
+
+  @override
+  String get guestLabel => 'Guest';
+
+  @override
+  String get todayLabel => 'Today';
+
+  @override
+  String get yesterdayLabel => 'Yesterday';
+
+  @override
+  String get noOngoingGames => 'No ongoing games';
+
+  @override
   String get gamesRolling => 'Monthly Rolling';
 
   @override
@@ -268,6 +319,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get live => 'LIVE';
+
+  @override
+  String get expenseBreakdown => 'Expense Breakdown';
+
+  @override
+  String get selectedTotal => 'Selected total';
+
+  @override
+  String ofGrandTotal(String percent) {
+    return '$percent% of grand total';
+  }
+
+  @override
+  String get noExpensesToday => 'No expenses today';
+
+  @override
+  String get thisMonth => 'This Month';
 
   @override
   String get account => 'Account';

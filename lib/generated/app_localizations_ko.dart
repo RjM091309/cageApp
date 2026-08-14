@@ -130,6 +130,57 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mtdExpenditure => '당월 경비';
 
   @override
+  String get statisticsLabel => '통계';
+
+  @override
+  String get ngrLabel => 'NGR';
+
+  @override
+  String get winLossLabel => '윈로스';
+
+  @override
+  String get totalCommissionLabel => '토탈 커미션';
+
+  @override
+  String get gameCommissionLabel => '게임 커미션';
+
+  @override
+  String get additionalCommissionLabel => '어디셔널 커미션';
+
+  @override
+  String get expensesLabel => '지출';
+
+  @override
+  String get cageRollingLabel => '케이지롤링';
+
+  @override
+  String get casinoRollingLabel => '카지노롤링';
+
+  @override
+  String get shareLabel => '셰어';
+
+  @override
+  String get noDataYet => '데이터 없음';
+
+  @override
+  String get commissionLabel => '커미션';
+
+  @override
+  String get settledGameLabel => '정산 게임';
+
+  @override
+  String get guestLabel => '게스트';
+
+  @override
+  String get todayLabel => '오늘';
+
+  @override
+  String get yesterdayLabel => '어제';
+
+  @override
+  String get noOngoingGames => '진행 중인 게임 없음';
+
+  @override
   String get gamesRolling => '월 누적 롤링';
 
   @override
@@ -266,6 +317,23 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get live => '라이브';
+
+  @override
+  String get expenseBreakdown => '지출 내역';
+
+  @override
+  String get selectedTotal => '선택 합계';
+
+  @override
+  String ofGrandTotal(String percent) {
+    return '총액 대비 $percent%';
+  }
+
+  @override
+  String get noExpensesToday => '오늘 지출 없음';
+
+  @override
+  String get thisMonth => '이번 달';
 
   @override
   String get account => '계정';
