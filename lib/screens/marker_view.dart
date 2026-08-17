@@ -77,20 +77,8 @@ class _MarkerViewState extends State<MarkerView> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Icon(Icons.description, color: primaryIndigo, size: 20),
-              const SizedBox(width: 8),
-              Text(l10n.realTimeMarker, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-              const Spacer(),
-              Text(l10n.totalMarker, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[400])),
-              const SizedBox(width: 8),
-              Text(_fmt.format(0), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 48),
+          _buildStickyTotalsBar(l10n, 0),
+          Expanded(
             child: Center(
               child: Text('No marker / credit data', style: TextStyle(fontSize: 15, color: Colors.grey[500])),
             ),
@@ -102,45 +90,57 @@ class _MarkerViewState extends State<MarkerView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Icon(Icons.description, color: primaryIndigo, size: 20),
-            const SizedBox(width: 8),
-            Text(l10n.realTimeMarker, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-            const Spacer(),
-            Text(l10n.totalMarker, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey[400])),
-            const SizedBox(width: 8),
-            Text(_fmt.format(totalMarkerBalance), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          ],
-        ),
-        const SizedBox(height: 24),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-                childAspectRatio: 1.55,
-              ),
-              itemCount: _markers.length,
-              itemBuilder: (context, i) {
-                final marker = _markers[i];
-                final hasLimit = marker.limit > 0;
-                final usagePercent = hasLimit ? (marker.balance / marker.limit) * 100 : 0.0;
-                return _CreditStyleCard(
-                  marker: marker,
-                  hasLimit: hasLimit,
-                  usagePercent: usagePercent,
-                );
-              },
-            );
-          },
+        _buildStickyTotalsBar(l10n, totalMarkerBalance),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
+              final mainAxisExtent = crossAxisCount == 1
+                  ? (constraints.maxHeight / 3 - 10).clamp(136.0, 176.0)
+                  : null;
+              return GridView.builder(
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                padding: const EdgeInsets.only(bottom: 8),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.9,
+                  mainAxisExtent: mainAxisExtent,
+                ),
+                itemCount: _markers.length,
+                itemBuilder: (context, i) {
+                  final marker = _markers[i];
+                  final hasLimit = marker.limit > 0;
+                  final usagePercent = hasLimit ? (marker.balance / marker.limit) * 100 : 0.0;
+                  return _CreditStyleCard(
+                    marker: marker,
+                    hasLimit: hasLimit,
+                    usagePercent: usagePercent,
+                  );
+                },
+              );
+            },
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStickyTotalsBar(AppLocalizations l10n, int total) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(Icons.description, color: primaryIndigo, size: 20),
+          const SizedBox(width: 8),
+          Text(l10n.realTimeMarker, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+          const Spacer(),
+          Text(l10n.totalMarker, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[400])),
+          const SizedBox(width: 8),
+          Text(_fmt.format(total), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+        ],
+      ),
     );
   }
 
@@ -148,26 +148,28 @@ class _MarkerViewState extends State<MarkerView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Row(
-          children: [
-            SkeletonBox(width: 20, height: 20, borderRadius: 6),
-            SizedBox(width: 8),
-            SkeletonBox(width: 180, height: 20, borderRadius: 4),
-          ],
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: const Row(
+            children: [
+              SkeletonBox(width: 20, height: 20, borderRadius: 6),
+              SizedBox(width: 8),
+              SkeletonBox(width: 180, height: 20, borderRadius: 4),
+            ],
+          ),
         ),
-        const SizedBox(height: 24),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.95,
-              ),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final crossAxisCount = constraints.maxWidth > 900 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
+              return GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.9,
+                ),
               itemCount: 6,
               itemBuilder: (context, i) {
                 return Container(
@@ -205,7 +207,8 @@ class _MarkerViewState extends State<MarkerView> {
                 );
               },
             );
-          },
+            },
+          ),
         ),
       ],
     );
@@ -229,12 +232,12 @@ class _CreditStyleCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
         gradient: LinearGradient(
@@ -249,10 +252,9 @@ class _CreditStyleCard extends StatelessWidget {
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
-            // Subtle shine line (credit card gloss)
             Positioned(
               top: 0,
               left: 0,
@@ -272,7 +274,6 @@ class _CreditStyleCard extends StatelessWidget {
                 ),
               ),
             ),
-            // Right watermark logo (low opacity), slightly left of right edge
             Positioned.fill(
               child: Align(
                 alignment: const Alignment(0.85, 0),
@@ -280,30 +281,27 @@ class _CreditStyleCard extends StatelessWidget {
                   opacity: 0.12,
                   child: Image.asset(
                     'assets/images/logoOnly.png',
-                    width: 140,
+                    width: 96,
                     fit: BoxFit.contain,
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Top row: logo (left) + date/time & Agent (right)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Logo (top left)
                       Image.asset(
                         'assets/images/logo.png',
-                        height: 28,
+                        height: 20,
                         fit: BoxFit.contain,
                       ),
-                      // Date/time + Agent (right column)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisSize: MainAxisSize.min,
@@ -311,15 +309,15 @@ class _CreditStyleCard extends StatelessWidget {
                           if (marker.lastUpdate.isNotEmpty)
                             Text(
                               marker.lastUpdate,
-                              style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w500),
+                              style: TextStyle(fontSize: 9, color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w500),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           if (marker.guest.isNotEmpty) ...[
-                            if (marker.lastUpdate.isNotEmpty) const SizedBox(height: 4),
+                            if (marker.lastUpdate.isNotEmpty) const SizedBox(height: 2),
                             Text(
                               'Agent : ${marker.guest}',
-                              style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.6), fontWeight: FontWeight.w500),
+                              style: TextStyle(fontSize: 9, color: Colors.white.withValues(alpha: 0.6), fontWeight: FontWeight.w500),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -328,32 +326,26 @@ class _CreditStyleCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  // Card number style (masked)
                   Text(
                     '••••  ••••  ••••  ${(marker.balance.abs() % 10000).toString().padLeft(4, '0')}',
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.white.withValues(alpha: 0.9),
-                      letterSpacing: 2.5,
+                      letterSpacing: 2,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // Cardholder name (agent NAME (CODE))
                   Text(
                     marker.agent,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.4,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 12),
-                  // Balance row + chip (bottom right, chip inline center)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -363,16 +355,15 @@ class _CreditStyleCard extends StatelessWidget {
                         children: [
                           Text(
                             l10n.activeBalance,
-                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
+                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
                           ),
-                          const SizedBox(height: 2),
                           Text(
                             _fmt.format(marker.balance),
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 17,
                               fontWeight: FontWeight.w800,
                               color: marker.balance >= 0 ? Colors.white : roseAccent,
-                              letterSpacing: 0.5,
+                              letterSpacing: 0.4,
                             ),
                           ),
                         ],
@@ -383,28 +374,27 @@ class _CreditStyleCard extends StatelessWidget {
                         children: [
                           if (hasLimit)
                             Padding(
-                              padding: const EdgeInsets.only(right: 12),
+                              padding: const EdgeInsets.only(right: 8),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
                                     l10n.limit,
-                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
+                                    style: TextStyle(fontSize: 8, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
                                   ),
-                                  const SizedBox(height: 2),
                                   Text(
                                     _fmt.format(marker.limit),
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.7)),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.7)),
                                   ),
                                 ],
                               ),
                             ),
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                             child: Image.asset(
                               'assets/images/ccChips.png',
-                              width: 56,
-                              height: 42,
+                              width: 40,
+                              height: 30,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -412,8 +402,7 @@ class _CreditStyleCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (hasLimit) ...[
-                    const SizedBox(height: 10),
+                  if (hasLimit)
                     Row(
                       children: [
                         Expanded(
@@ -421,7 +410,7 @@ class _CreditStyleCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: (usagePercent / 100).clamp(0.0, 1.0),
-                              minHeight: 5,
+                              minHeight: 4,
                               backgroundColor: Colors.white.withValues(alpha: 0.1),
                               valueColor: AlwaysStoppedAnimation(usagePercent > 80 ? roseAccent : accentPurple),
                             ),
@@ -430,11 +419,10 @@ class _CreditStyleCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           '${usagePercent.toStringAsFixed(0)}%',
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: usagePercent > 80 ? roseAccent : accentPurple),
+                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: usagePercent > 80 ? roseAccent : accentPurple),
                         ),
                       ],
                     ),
-                  ],
                 ],
               ),
             ),

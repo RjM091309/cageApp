@@ -359,7 +359,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
         child: content,
       ),
     );
-    if (view == ViewType.ranking) {
+    if (view == ViewType.ranking || view == ViewType.marker) {
       return Padding(
         padding: padding,
         child: wrapped,
@@ -433,7 +433,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                       Expanded(
                         child: !isWide
                             ? _buildPortraitPageView(context)
-                            : _activeView == ViewType.ranking
+                            : (_activeView == ViewType.ranking || _activeView == ViewType.marker)
                                 ? Padding(
                                     padding: const EdgeInsets.all(24),
                                     child: Center(

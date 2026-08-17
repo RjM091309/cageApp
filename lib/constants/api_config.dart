@@ -1,6 +1,6 @@
 
 
-const String apiBaseUrl = 'https://infinitycage.3core21.com';
+const String apiBaseUrl = 'https://infcage.3core21.com';
 
 String get loginApiUrl => '$apiBaseUrl/api/auth/login';
 
