@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,12 +43,23 @@ class AuthService {
   static const _keyFingerprintEnabled = 'fingerprint_enabled';
   static const _keyNotificationsEnabled = 'notifications_enabled';
 
-  /// Token in memory only so that when app is killed, session is expired (back to login + fingerprint).
+  /// Memory-only on mobile so that when the app is killed, session is expired (back to login +
+  /// fingerprint). On web, also mirrored to SharedPreferences (browser storage) since every page
+  /// refresh restarts the Dart runtime — without this, a refresh would always force re-login.
   String? _token;
 
-  /// Returns current token or null. Not persisted — session expires when app process is killed.
+  /// Returns current token or null.
   Future<String?> getToken() async {
-    return _token;
+    if (_token != null) return _token;
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString(_keyToken);
+      if (stored != null && stored.isNotEmpty) {
+        _token = stored;
+        return _token;
+      }
+    }
+    return null;
   }
 
   /// Returns stored user or null.
@@ -95,6 +107,9 @@ class AuthService {
       );
       _token = token;
       final prefs = await SharedPreferences.getInstance();
+      if (kIsWeb) {
+        await prefs.setString(_keyToken, token);
+      }
       await prefs.setString(_keyUser, jsonEncode({
         'username': user.username,
         'firstname': user.firstname,

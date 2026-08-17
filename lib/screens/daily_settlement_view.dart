@@ -118,7 +118,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
           builder: (context, constraints) {
             final crossAxisCount = constraints.maxWidth > 900 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
             final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
-            final aspectRatio = isTabletWidth ? 1.65 : 1.95;
+            final aspectRatio = isTabletWidth ? 1.65 : (crossAxisCount == 2 ? 1.3 : 1.95);
             const spacing = 16.0;
             final cardWidth = (constraints.maxWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
             final cardHeight = cardWidth / aspectRatio;
@@ -342,7 +342,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
           builder: (context, constraints) {
             final crossAxisCount = constraints.maxWidth > 900 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
             final isTabletWidth = constraints.maxWidth > 600 && constraints.maxWidth <= 1400;
-            final aspectRatio = isTabletWidth ? 1.65 : 1.95;
+            final aspectRatio = isTabletWidth ? 1.65 : (crossAxisCount == 2 ? 1.3 : 1.95);
             final houseBalance = _data.totalChips + _data.cashBalance;
             const spacing = 16.0;
             final cardWidth = (constraints.maxWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;

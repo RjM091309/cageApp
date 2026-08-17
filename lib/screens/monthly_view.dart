@@ -113,19 +113,34 @@ class _MonthlyViewState extends State<MonthlyView> {
         children: [
           const SizedBox(width: 40),
           if (showGuest)
-            Expanded(flex: 2, child: Text(l10n.guestLabel, style: style)),
+            Expanded(
+                flex: 2,
+                child: Text(l10n.guestLabel,
+                    maxLines: 1, softWrap: false, style: style)),
           Expanded(
-              child:
-                  Text(l10n.buyIn, textAlign: TextAlign.end, style: style)),
+              child: Text(l10n.buyIn,
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: style)),
           Expanded(
-              child:
-                  Text(l10n.cashOut, textAlign: TextAlign.end, style: style)),
+              child: Text(l10n.cashOut,
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: style)),
           Expanded(
               child: Text(l10n.commissionLabel,
-                  textAlign: TextAlign.end, style: style)),
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: style)),
           Expanded(
               child: Text(l10n.winLossLabel,
-                  textAlign: TextAlign.end, style: style)),
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: style)),
         ],
       ),
     );
@@ -275,11 +290,21 @@ class _MonthlyViewState extends State<MonthlyView> {
                             style: TextStyle(color: Colors.grey[500])),
                       ),
                     )
-                  else ...[
-                    _tableHeader(isTablet),
-                    for (var i = 0; i < ongoing.length; i++)
-                      _ongoingRow(_rankOf(i), ongoing[i], isTablet, i.isOdd),
-                  ],
+                  else
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                        width: isTablet ? constraints.maxWidth : 680,
+                        child: Column(
+                          children: [
+                            _tableHeader(isTablet),
+                            for (var i = 0; i < ongoing.length; i++)
+                              _ongoingRow(
+                                  _rankOf(i), ongoing[i], isTablet, i.isOdd),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -307,14 +332,29 @@ class _MonthlyViewState extends State<MonthlyView> {
                       ],
                     ),
                   ),
-                  _tableHeader(isTablet, showGuest: false),
                   if (_loading)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(child: CircularProgressIndicator()),
+                    Column(
+                      children: [
+                        _tableHeader(isTablet, showGuest: false),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      ],
                     )
                   else
-                    _settledRow(settled, isTablet),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                        width: isTablet ? constraints.maxWidth : 480,
+                        child: Column(
+                          children: [
+                            _tableHeader(isTablet, showGuest: false),
+                            _settledRow(settled, isTablet),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

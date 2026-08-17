@@ -49,14 +49,12 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
   /// When null = no transition. When set, we're animating from _previousView to _activeView.
   ViewType? _previousView;
   late final AnimationController _contentTransitionController;
-  late final AnimationController _toastSlideController;
   late final PageController _pageController;
   late Widget _cachedContent;
   Widget? _outgoingContent;
   bool _notificationOpen = false;
   bool _languageOpen = false;
   bool _profileOpen = false;
-  bool _showNotificationToast = false;
   bool _isServerOnline = true;
   StreamSubscription<bool>? _serverStatusSub;
   List<NotificationItem> _notifications = [];
@@ -107,15 +105,6 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
         });
       }
     });
-    _toastSlideController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
-    _toastSlideController.addStatusListener((status) {
-      if (status == AnimationStatus.dismissed && mounted) {
-        setState(() => _showNotificationToast = false);
-      }
-    });
   }
 
   @override
@@ -132,7 +121,6 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
   @override
   void dispose() {
     _notificationPollTimer?.cancel();
-    _toastSlideController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     NotificationService.onNotificationsChanged = null;
     _serverStatusSub?.cancel();
@@ -149,7 +137,6 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
 
   Future<void> _loadNotifications({bool silent = false, bool acceptEmpty = false, bool append = false}) async {
     if (!mounted) return;
-    final previousIds = Set<int>.from(_notifications.map((n) => n.id));
     final offset = append ? _notifications.length : 0;
     if (append) {
       setState(() => _notificationsLoadingMore = true);
@@ -168,28 +155,12 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
       });
       return;
     }
-    final hasNew = nextList.any((n) => !previousIds.contains(n.id));
-    final hasNewUnread = hasNew && nextList.any((n) => !previousIds.contains(n.id) && !n.isRead);
     setState(() {
       _notifications = nextList;
       _notificationTotal = total;
       _notificationsLoading = false;
       _notificationsLoadingMore = false;
     });
-    if (!append) {
-      final notificationsEnabled = await AuthService.instance.getNotificationsEnabled();
-      final shouldShowToast = mounted && hasNewUnread && notificationsEnabled;
-      if (shouldShowToast) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          setState(() => _showNotificationToast = true);
-          _toastSlideController.forward();
-          Future.delayed(const Duration(seconds: 3), () {
-            if (mounted) _toastSlideController.reverse();
-          });
-        });
-      }
-    }
   }
 
   Future<void> _markAllNotificationsAsRead() async {
@@ -212,58 +183,6 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
   Future<void> _loadMoreNotifications() async {
     if (_notificationsLoadingMore || _notifications.length >= _notificationTotal) return;
     await _loadNotifications(silent: true, append: true);
-  }
-
-  Widget _buildNotificationToast(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final size = MediaQuery.sizeOf(context);
-    final isPortrait = size.width < 1024;
-    final bottomInset = isPortrait ? 24.0 + 80.0 : 24.0;
-    return Positioned(
-      right: 0,
-      bottom: bottomInset,
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(parent: _toastSlideController, curve: Curves.easeOutCubic)),
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: 320,
-              margin: const EdgeInsets.only(right: 24),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: surfaceDarkMid,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(-2, 0)),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.newActivityCheckNotifications,
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() => _notificationOpen = true);
-                    },
-                    child: Text(l10n.viewNotifications, style: TextStyle(color: primaryIndigo, fontWeight: FontWeight.w600)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Future<void> _clearAllNotifications() async {
@@ -656,7 +575,6 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                   currentUser: _currentUser,
                 ),
               ),
-            if (_showNotificationToast) _buildNotificationToast(context),
           ],
         ),
       ),

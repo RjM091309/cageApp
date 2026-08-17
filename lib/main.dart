@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'generated/app_localizations.dart';
 import 'platform_init_stub.dart' if (dart.library.io) 'platform_init_io.dart' as platform_init;
@@ -11,6 +12,8 @@ import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 import 'services/biometric_service.dart';
 import 'theme/app_theme.dart';
+
+const _kLocaleKey = 'app_locale';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +28,10 @@ void main() async {
       ),
     );
   }
-  runApp(const AppCageApp());
+  final prefs = await SharedPreferences.getInstance();
+  final storedLanguageCode = prefs.getString(_kLocaleKey);
+  final initialLocale = storedLanguageCode != null ? Locale(storedLanguageCode) : const Locale('ko');
+  runApp(AppCageApp(initialLocale: initialLocale));
 }
 
 class AppLocaleScope extends InheritedWidget {
@@ -51,17 +57,28 @@ class AppLocaleScope extends InheritedWidget {
 }
 
 class AppCageApp extends StatefulWidget {
-  const AppCageApp({super.key});
+  const AppCageApp({super.key, required this.initialLocale});
+
+  final Locale initialLocale;
 
   @override
   State<AppCageApp> createState() => _AppCageAppState();
 }
 
 class _AppCageAppState extends State<AppCageApp> {
-  Locale? _locale = const Locale('ko');
+  Locale? _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _locale = widget.initialLocale;
+  }
 
   void _setLocale(Locale? locale) {
     setState(() => _locale = locale);
+    if (locale != null) {
+      SharedPreferences.getInstance().then((prefs) => prefs.setString(_kLocaleKey, locale.languageCode));
+    }
   }
 
   @override

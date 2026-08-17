@@ -24,7 +24,7 @@ class Handler(SimpleHTTPRequestHandler):
     }
 
     def end_headers(self):
-        if self.path.split("?", 1)[0] in ("/", "/index.html"):
+        if self.path.split("?", 1)[0] in ("/", "/index.html", "/flutter_service_worker.js"):
             self.send_header("Cache-Control", "no-cache")
         super().end_headers()
 
