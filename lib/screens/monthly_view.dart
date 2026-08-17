@@ -197,81 +197,6 @@ class _MonthlyViewState extends State<MonthlyView> {
     );
   }
 
-  Widget _miniStat(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(),
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-                color: Colors.grey[500])),
-        const SizedBox(height: 3),
-        Text(value,
-            style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: color)),
-      ],
-    );
-  }
-
-  /// Narrow screens can't fit a 6-column table without wrapping, so show each
-  /// game as a card with a 2-column stat grid instead.
-  Widget _ongoingCardMobile(String rank, OngoingGameRow row) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _rankBadge(rank),
-              const SizedBox(width: 10),
-              Flexible(
-                child: Text(row.account,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: tealAccent)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                  child: _miniStat(l10n.buyIn, _kFmt(row.buyIn), roseAccent)),
-              Expanded(
-                  child: _miniStat(
-                      l10n.cashOut, _kFmt(row.cashOut), roseAccent)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                  child: _miniStat(l10n.commissionLabel,
-                      _kFmt(row.commission), amberAccent)),
-              Expanded(
-                  child: _miniStat(l10n.winLossLabel, _kFmt(row.winLoss),
-                      accentPurple)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _settledRow(SettledGameTotals totals, bool isTablet) {
     final fontSize = isTablet ? _rowFontTablet : _rowFontMobile;
     return Padding(
@@ -350,20 +275,11 @@ class _MonthlyViewState extends State<MonthlyView> {
                             style: TextStyle(color: Colors.grey[500])),
                       ),
                     )
-                  else if (isTablet) ...[
+                  else ...[
                     _tableHeader(isTablet),
                     for (var i = 0; i < ongoing.length; i++)
                       _ongoingRow(_rankOf(i), ongoing[i], isTablet, i.isOdd),
-                  ] else
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        children: [
-                          for (var i = 0; i < ongoing.length; i++)
-                            _ongoingCardMobile(_rankOf(i), ongoing[i]),
-                        ],
-                      ),
-                    ),
+                  ],
                 ],
               ),
             ),
