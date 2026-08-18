@@ -726,8 +726,19 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(color: primaryIndigo, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: primaryIndigo.withValues(alpha: 0.3), blurRadius: 12)]),
-                  child: const Icon(Icons.dashboard, color: Colors.white, size: 24),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [BoxShadow(color: primaryIndigo.withValues(alpha: 0.3), blurRadius: 12)],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/images/logoOnly.png',
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Column(
@@ -847,13 +858,20 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: primaryIndigo.withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(color: primaryIndigo.withValues(alpha: 0.4), blurRadius: 10),
                 ],
               ),
-              child: const Icon(Icons.dashboard, color: Colors.white, size: 18),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'assets/images/logoOnly.png',
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
