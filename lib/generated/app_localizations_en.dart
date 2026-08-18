@@ -324,6 +324,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseBreakdown => 'Expense Breakdown';
 
   @override
+  String get totalExpenses => 'Total Expenses';
+
+  @override
   String get selectedTotal => 'Selected total';
 
   @override

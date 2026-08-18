@@ -716,6 +716,12 @@ abstract class AppLocalizations {
   /// **'Expense Breakdown'**
   String get expenseBreakdown;
 
+  /// No description provided for @totalExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Expenses'**
+  String get totalExpenses;
+
   /// No description provided for @selectedTotal.
   ///
   /// In en, this message translates to:

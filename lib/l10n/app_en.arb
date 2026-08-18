@@ -117,6 +117,7 @@
   "ongoingGames": "On Going Game",
   "live": "LIVE",
   "expenseBreakdown": "Expense Breakdown",
+  "totalExpenses": "Total Expenses",
   "selectedTotal": "Selected total",
   "ofGrandTotal": "{percent}% of grand total",
   "@ofGrandTotal": {

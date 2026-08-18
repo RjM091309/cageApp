@@ -7,6 +7,7 @@ import '../generated/app_localizations.dart';
 import '../main.dart';
 import '../models/types.dart';
 import '../theme/app_theme.dart';
+import '../utils/fold_layout.dart';
 import '../services/auth_service.dart';
 import '../services/server_status_service.dart';
 import '../services/notification_service.dart';
@@ -266,7 +267,8 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
 
   /// One page in the portrait PageView carousel.
   Widget _buildPortraitPage(BuildContext context, ViewType view) {
-    const padding = EdgeInsets.all(24);
+    final pad = FoldLayout.pagePadding(context);
+    final padding = EdgeInsets.all(pad);
     const maxWidth = BoxConstraints(maxWidth: 1280);
     final content = ActiveViewScope(
       activeView: view,
@@ -278,7 +280,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
         child: content,
       ),
     );
-    if (view == ViewType.ranking || view == ViewType.marker) {
+    if (view == ViewType.ranking || view == ViewType.marker || view == ViewType.daily) {
       return Padding(
         padding: padding,
         child: wrapped,
@@ -352,9 +354,11 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                       Expanded(
                         child: !isWide
                             ? _buildPortraitPageView(context)
-                            : (_activeView == ViewType.ranking || _activeView == ViewType.marker)
+                            : (_activeView == ViewType.ranking ||
+                                    _activeView == ViewType.marker ||
+                                    _activeView == ViewType.daily)
                                 ? Padding(
-                                    padding: const EdgeInsets.all(24),
+                                    padding: EdgeInsets.all(FoldLayout.pagePadding(context)),
                                     child: Center(
                                       child: ConstrainedBox(
                                         constraints: const BoxConstraints(maxWidth: 1280),
@@ -366,7 +370,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                                     ),
                                   )
                                 : SingleChildScrollView(
-                                    padding: const EdgeInsets.all(24),
+                                    padding: EdgeInsets.all(FoldLayout.pagePadding(context)),
                                     child: Center(
                                       child: ConstrainedBox(
                                         constraints: const BoxConstraints(maxWidth: 1280),
@@ -828,35 +832,52 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
   }
 
   Widget _buildHeader(BuildContext context, bool isWide) {
+    final folded = FoldLayout.isFoldedCover(context);
+    final iconDensity = folded ? VisualDensity.compact : VisualDensity.standard;
     return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: folded ? 64 : 80,
+      padding: EdgeInsets.symmetric(horizontal: folded ? 8 : 16),
       decoration: BoxDecoration(
         color: appBarBackground.withValues(alpha: 0.3),
       ),
       child: Row(
         children: [
-          if (!isWide)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(color: primaryIndigo, borderRadius: BorderRadius.circular(8)),
-                  child: const Icon(Icons.dashboard, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 8),
-                Text(AppLocalizations.of(context).appTitle, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
-              ],
+          if (!isWide) ...[
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: primaryIndigo.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(color: primaryIndigo.withValues(alpha: 0.4), blurRadius: 10),
+                ],
+              ),
+              child: const Icon(Icons.dashboard, color: Colors.white, size: 18),
             ),
-          if (!isWide) const Spacer(),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    AppLocalizations.of(context).appTitle,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
           if (isWide)
             Text(
               _viewLabel(context),
               style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: -0.5),
             ),
-          const Spacer(),
+          if (isWide) const Spacer(),
           if (isWide)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -887,13 +908,15 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                 ],
               ),
             ),
-          const SizedBox(width: 16),
+          if (!folded) const SizedBox(width: 16),
           IconButton(
+            visualDensity: iconDensity,
             tooltip: AppLocalizations.of(context).language,
             onPressed: () => setState(() => _languageOpen = true),
             icon: const Icon(Icons.language, color: Colors.grey, size: 24),
           ),
           IconButton(
+            visualDensity: iconDensity,
             onPressed: () {
               setState(() => _notificationOpen = true);
               _loadNotifications();
@@ -916,8 +939,9 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
           ),
           if (!isWide)
             IconButton(
+              visualDensity: iconDensity,
               onPressed: () => setState(() => _profileOpen = true),
-              icon: CircleAvatar(radius: 18, backgroundColor: primaryIndigo, child: const Icon(Icons.person, size: 18, color: Colors.white)),
+              icon: CircleAvatar(radius: folded ? 14 : 18, backgroundColor: primaryIndigo, child: const Icon(Icons.person, size: 18, color: Colors.white)),
             ),
         ],
       ),
@@ -961,13 +985,14 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: FoldLayout.isFoldedCover(context) ? 8 : 16),
             child: SafeArea(
               child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: navItems(context).map((e) {
             final isActive = _activeView == e.$1;
-            return InkWell(
+            return Expanded(
+              child: InkWell(
               onTap: () => _setActiveView(e.$1, animatePage: true),
               borderRadius: BorderRadius.circular(12),
               child: Column(
@@ -979,12 +1004,17 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                     child: Icon(e.$3, size: 22, color: isActive ? primaryIndigo : Colors.grey),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    e.$2,
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5, color: isActive ? primaryIndigo : Colors.grey),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      e.$2,
+                      maxLines: 1,
+                      style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5, color: isActive ? primaryIndigo : Colors.grey),
+                    ),
                   ),
                 ],
               ),
+            ),
             );
               }).toList(),
               ),

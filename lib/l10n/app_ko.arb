@@ -103,6 +103,7 @@
   "ongoingGames": "진행중인 게임",
   "live": "라이브",
   "expenseBreakdown": "지출 내역",
+  "totalExpenses": "총 지출",
   "selectedTotal": "선택 합계",
   "ofGrandTotal": "총액 대비 {percent}%",
   "noExpensesToday": "오늘 지출 없음",

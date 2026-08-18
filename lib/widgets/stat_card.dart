@@ -19,6 +19,9 @@ class StatCard extends StatelessWidget {
   /// tall aspect ratio).
   final bool centered;
 
+  /// Icon + label/value in one row. Use for a full-width spanning card.
+  final bool horizontal;
+
   const StatCard({
     super.key,
     required this.label,
@@ -30,6 +33,7 @@ class StatCard extends StatelessWidget {
     this.trendValue,
     this.trendIsUp,
     this.centered = false,
+    this.horizontal = false,
   });
 
   Color get _colorValue {
@@ -48,104 +52,135 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final short = constraints.maxHeight > 0 && constraints.maxHeight < 130;
         final isCompact = constraints.maxHeight < 90 || constraints.maxWidth < 140;
-        // Tablet/mid size: mas malaki padding para hindi mukhang lubog ang text
-        final isTabletSize = constraints.maxWidth >= 160 && constraints.maxWidth <= 320;
-        final padding = isCompact ? 8.0 : (isTabletSize ? 16.0 : 14.0);
-        final spacing = isCompact ? 4.0 : 8.0;
-        final valueFontSize = isCompact ? 14.0 : (centered ? 24.0 : 22.0);
-        final labelFontSize = isCompact ? 10.0 : (centered ? 18.0 : 13.0);
-        final iconBoxSize = isCompact ? 4.0 : (centered ? 10.0 : 8.0);
-        final iconSize = isCompact ? 14.0 : (centered ? 24.0 : 18.0);
-        return Container(
-          padding: EdgeInsets.all(padding),
-          alignment: centered ? Alignment.center : null,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _colorValue.withValues(alpha: 0.3)),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                _colorValue.withValues(alpha: 0.2),
-                _colorValue.withValues(alpha: 0.05),
-              ],
-            ),
+        final padding = isCompact || short ? 10.0 : 12.0;
+        final spacing = isCompact ? 4.0 : 6.0;
+        final valueFontSize = isCompact ? 16.0 : (short ? 18.0 : 20.0);
+        final labelFontSize = isCompact ? 9.0 : 10.0;
+        final iconBoxSize = isCompact || short ? 6.0 : 8.0;
+        final iconSize = isCompact || short ? 16.0 : 18.0;
+        final decoration = BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: _colorValue.withValues(alpha: 0.3)),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              _colorValue.withValues(alpha: 0.2),
+              _colorValue.withValues(alpha: 0.05),
+            ],
           ),
-          child: Column(
-            crossAxisAlignment: centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisSize: centered ? MainAxisSize.min : MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(iconBoxSize),
-                    decoration: BoxDecoration(
-                      color: _colorValue.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(10),
+        );
+        if (horizontal) {
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: padding + 4, vertical: 8),
+            decoration: decoration,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                width: (constraints.maxWidth - (padding + 4) * 2).clamp(0.0, double.infinity),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(iconBoxSize),
+                      decoration: BoxDecoration(
+                        color: _colorValue.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, size: iconSize, color: Colors.white),
                     ),
-                    child: Icon(icon, size: iconSize, color: Colors.white),
-                  ),
-                  if (trendValue != null)
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: (trendIsUp ?? true) ? emeraldAccent.withValues(alpha: 0.2) : roseAccent.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${(trendIsUp ?? true) ? '+' : '-'}$trendValue',
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: (trendIsUp ?? true) ? emeraldAccent : roseAccent,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        label.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.8,
+                          color: Colors.white.withValues(alpha: 0.55),
                         ),
                       ),
                     ),
-                ],
-              ),
-              SizedBox(height: centered ? spacing * 1.5 : spacing),
-              Padding(
-                padding: centered ? EdgeInsets.zero : const EdgeInsets.only(right: 4),
-                child: Text(
-                  label.toUpperCase(),
-                  textAlign: centered ? TextAlign.center : TextAlign.start,
-                  style: TextStyle(
-                    fontSize: labelFontSize,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: centered ? 1.2 : 0.6,
-                    color: Colors.white,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: centered ? 2 : 1,
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          value,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: centered ? Alignment.center : Alignment.centerLeft,
-                  child: Padding(
-                    padding: centered ? EdgeInsets.zero : const EdgeInsets.only(right: 8),
-                    child: DefaultTextStyle(
-                      style: TextStyle(
-                        fontSize: valueFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      child: valueWidget ??
-                          Text(
-                            value,
-                            maxLines: 1,
-                          ),
-                    ),
+            ),
+          );
+        }
+        return Container(
+          padding: EdgeInsets.all(padding),
+          alignment: centered ? Alignment.center : Alignment.topLeft,
+          decoration: decoration,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: centered ? Alignment.center : Alignment.topLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: (constraints.maxWidth - padding * 2).clamp(0.0, double.infinity),
+              ),
+              child: Column(
+            crossAxisAlignment: centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(iconBoxSize),
+                decoration: BoxDecoration(
+                  color: _colorValue.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: iconSize, color: Colors.white),
+              ),
+              SizedBox(height: spacing),
+              Text(
+                label.toUpperCase(),
+                textAlign: centered ? TextAlign.center : TextAlign.start,
+                style: TextStyle(
+                  fontSize: labelFontSize,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.4,
+                  color: Colors.white.withValues(alpha: 0.78),
+                  height: 1.15,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              SizedBox(height: spacing),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: centered ? Alignment.center : Alignment.centerLeft,
+                child: DefaultTextStyle(
+                  style: TextStyle(
+                    fontSize: valueFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.1,
                   ),
+                  child: valueWidget ??
+                      Text(
+                        value,
+                        maxLines: 1,
+                      ),
                 ),
               ),
               if (subValue != null)
@@ -160,6 +195,8 @@ class StatCard extends StatelessWidget {
                   ),
                 ),
             ],
+              ),
+            ),
           ),
         );
       },

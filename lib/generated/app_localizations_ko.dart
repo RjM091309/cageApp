@@ -322,6 +322,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get expenseBreakdown => '지출 내역';
 
   @override
+  String get totalExpenses => '총 지출';
+
+  @override
   String get selectedTotal => '선택 합계';
 
   @override
