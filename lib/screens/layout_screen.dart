@@ -280,6 +280,13 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
         child: content,
       ),
     );
+    // Dashboard cards must fill the viewport (no vertical/horizontal scroll).
+    if (view == ViewType.realTime) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(pad, pad, pad, 0),
+        child: SizedBox.expand(child: content),
+      );
+    }
     if (view == ViewType.ranking || view == ViewType.marker || view == ViewType.daily) {
       return Padding(
         padding: padding,
@@ -369,18 +376,33 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                                       ),
                                     ),
                                   )
-                                : SingleChildScrollView(
-                                    padding: EdgeInsets.all(FoldLayout.pagePadding(context)),
-                                    child: Center(
-                                      child: ConstrainedBox(
-                                        constraints: const BoxConstraints(maxWidth: 1280),
-                                        child: ActiveViewScope(
-                                          activeView: _activeView,
-                                          child: _buildTransitionContent(),
+                                : _activeView == ViewType.realTime
+                                    ? Padding(
+                                        padding: EdgeInsets.all(FoldLayout.pagePadding(context)),
+                                        child: Center(
+                                          child: ConstrainedBox(
+                                            constraints: const BoxConstraints(maxWidth: 1280),
+                                            child: SizedBox.expand(
+                                              child: ActiveViewScope(
+                                                activeView: _activeView,
+                                                child: _buildTransitionContent(),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : SingleChildScrollView(
+                                        padding: EdgeInsets.all(FoldLayout.pagePadding(context)),
+                                        child: Center(
+                                          child: ConstrainedBox(
+                                            constraints: const BoxConstraints(maxWidth: 1280),
+                                            child: ActiveViewScope(
+                                              activeView: _activeView,
+                                              child: _buildTransitionContent(),
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
                       ),
                       if (!isWide) const SizedBox(height: 80),
                     ],

@@ -82,11 +82,12 @@ class _RealTimeViewState extends State<RealTimeView> {
     );
   }
 
-  Widget _buildHighlightCard() {
+  Widget _buildHighlightCard(_DashboardFit fit) {
     final l10n = AppLocalizations.of(context);
-    final folded = FoldLayout.isFoldedCover(context);
     return Container(
-      padding: EdgeInsets.fromLTRB(folded ? 12 : 16, folded ? 12 : 14, folded ? 12 : 16, folded ? 12 : 16),
+      width: double.infinity,
+      height: double.infinity,
+      padding: EdgeInsets.fromLTRB(fit.highlightPad, fit.highlightPad * 0.7, fit.highlightPad, fit.highlightPad),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: emeraldAccent.withValues(alpha: 0.35)),
@@ -100,18 +101,14 @@ class _RealTimeViewState extends State<RealTimeView> {
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: emeraldAccent.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.trending_up, size: 18, color: emeraldAccent),
+                width: fit.highlightIcon,
+                height: fit.highlightIcon,
+                decoration: BoxDecoration(color: emeraldAccent.withValues(alpha: 0.25), shape: BoxShape.circle),
+                child: Icon(Icons.trending_up, size: fit.highlightIcon * 0.5, color: emeraldAccent),
               ),
               const Spacer(),
               Material(
@@ -121,29 +118,47 @@ class _RealTimeViewState extends State<RealTimeView> {
                   onTap: _showStatisticsDialog,
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: EdgeInsets.symmetric(horizontal: fit.statBtnPadH, vertical: fit.statBtnPadV),
                     child: Text(
                       l10n.statisticsLabel,
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+                      style: TextStyle(color: Colors.white, fontSize: fit.statBtnFont, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: folded ? 10 : 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: _metricBlock(l10n.winLossLabel, _summary?.winLoss)),
-              Container(
-                width: 1,
-                height: folded ? 44 : 52,
-                margin: const EdgeInsets.symmetric(horizontal: 12),
-                color: Colors.white.withValues(alpha: 0.12),
-              ),
-              Expanded(child: _metricBlock(l10n.ngrLabel, _summary?.ngr)),
-            ],
+          SizedBox(height: fit.highlightGap),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, metricsBox) {
+                final dividerH = (metricsBox.maxHeight * 0.55).clamp(18.0, fit.dividerHeight);
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _highlightMetric(
+                        label: l10n.winLossLabel,
+                        value: _summary?.winLoss,
+                        fit: fit,
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: dividerH,
+                      margin: EdgeInsets.symmetric(horizontal: fit.dividerMargin),
+                      color: Colors.white.withValues(alpha: 0.15),
+                    ),
+                    Expanded(
+                      child: _highlightMetric(
+                        label: l10n.ngrLabel,
+                        value: _summary?.ngr,
+                        fit: fit,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -155,39 +170,38 @@ class _RealTimeViewState extends State<RealTimeView> {
     return value > 0 ? emeraldAccent : roseAccent;
   }
 
-  Widget _metricBlock(String label, int? value) {
-    final folded = FoldLayout.isFoldedCover(context);
+  Widget _highlightMetric({required String label, required int? value, required _DashboardFit fit}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          label.toUpperCase(),
+          label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.white.withValues(alpha: 0.7),
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.6,
-          ),
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: fit.highlightLabel, color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 6),
-        _amountText(
-          _summary == null ? null : value,
-          fontSize: folded ? 16 : 20,
-          color: _signedAmountColor(value),
+        SizedBox(height: fit.compact ? 4 : 6),
+        Flexible(
+          child: _amountText(
+            value,
+            fontSize: fit.highlightAmount,
+            color: _signedAmountColor(value),
+            align: Alignment.center,
+          ),
         ),
       ],
     );
   }
 
-  Widget _amountText(int? value, {required double fontSize, required Color color}) {
+  Widget _amountText(int? value, {required double fontSize, required Color color, Alignment align = Alignment.centerLeft}) {
     if (_loadingSummary || value == null) {
       return SkeletonBox(width: fontSize * 4, height: fontSize * 1.1);
     }
     return FittedBox(
       fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
+      alignment: align,
       child: Text(
         _fmt.format(value),
         maxLines: 1,
@@ -196,63 +210,197 @@ class _RealTimeViewState extends State<RealTimeView> {
     );
   }
 
-  Widget _wideStatCard({required IconData icon, required Color color, required String label, required int? value}) {
-    final folded = FoldLayout.isFoldedCover(context);
+  Widget _wideStatCard({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required int? value,
+    required _DashboardFit fit,
+  }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: folded ? 12 : 18, vertical: folded ? 16 : 22),
+      width: double.infinity,
+      height: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: fit.cardPadH, vertical: fit.cardPadV),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: borderColor),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: folded ? 40 : 46,
-            height: folded ? 40 : 46,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-            child: Icon(icon, size: folded ? 20 : 22, color: color),
-          ),
-          SizedBox(width: folded ? 10 : 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: folded ? 14 : 16, color: Colors.white, fontWeight: FontWeight.bold),
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final iconBox = box.maxHeight.clamp(22.0, fit.cardIcon);
+          return Row(
+            children: [
+              Container(
+                width: iconBox,
+                height: iconBox,
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                child: Icon(icon, size: iconBox * 0.48, color: color),
+              ),
+              SizedBox(width: fit.cardGap),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: fit.cardLabel, color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: fit.compact ? 2 : 4),
+                    Flexible(
+                      child: _amountText(value, fontSize: fit.cardAmount, color: Colors.white),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: _amountText(value, fontSize: folded ? 16 : 19, color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  Widget _statSlot({required Widget child}) {
+    return Expanded(child: child);
+  }
+
+  List<Widget> _secondaryCards(AppLocalizations l10n, _DashboardFit fit) {
+    return [
+      _wideStatCard(icon: Icons.account_balance_wallet, color: amberAccent, label: l10n.totalCommissionLabel, value: _summary?.totalCommission, fit: fit),
+      _wideStatCard(icon: Icons.shield, color: roseAccent, label: l10n.accumulatedExpenses, value: _summary?.expenses, fit: fit),
+      _wideStatCard(icon: Icons.videogame_asset, color: primaryIndigo, label: l10n.cageRollingLabel, value: _summary?.cageRolling, fit: fit),
+      _wideStatCard(icon: Icons.casino, color: primaryIndigo, label: l10n.casinoRollingLabel, value: _summary?.casinoRolling, fit: fit),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildHighlightCard(),
-        const SizedBox(height: 18),
-        _wideStatCard(icon: Icons.account_balance_wallet, color: amberAccent, label: l10n.totalCommissionLabel, value: _summary?.totalCommission),
-        const SizedBox(height: 14),
-        _wideStatCard(icon: Icons.shield, color: roseAccent, label: l10n.accumulatedExpenses, value: _summary?.expenses),
-        const SizedBox(height: 14),
-        _wideStatCard(icon: Icons.videogame_asset, color: primaryIndigo, label: l10n.cageRollingLabel, value: _summary?.cageRolling),
-        const SizedBox(height: 14),
-        _wideStatCard(icon: Icons.casino, color: primaryIndigo, label: l10n.casinoRollingLabel, value: _summary?.casinoRolling),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final fit = _DashboardFit.from(constraints);
+        final cards = _secondaryCards(l10n, fit);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: fit.useGrid ? 5 : 4,
+              child: _buildHighlightCard(fit),
+            ),
+            SizedBox(height: fit.gap),
+            if (fit.useGrid)
+              Expanded(
+                flex: 8,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          _statSlot(child: cards[0]),
+                          SizedBox(width: fit.gap),
+                          _statSlot(child: cards[1]),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: fit.gap),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          _statSlot(child: cards[2]),
+                          SizedBox(width: fit.gap),
+                          _statSlot(child: cards[3]),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              for (var i = 0; i < cards.length; i++) ...[
+                if (i > 0) SizedBox(height: fit.gap),
+                Expanded(flex: 3, child: cards[i]),
+              ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Viewport-based sizes so the 5 dashboard cards always fit without scrolling.
+class _DashboardFit {
+  final bool compact;
+  final bool useGrid;
+  final double gap;
+  final double highlightPad;
+  final double highlightGap;
+  final double highlightIcon;
+  final double highlightLabel;
+  final double highlightAmount;
+  final double dividerHeight;
+  final double dividerMargin;
+  final double statBtnPadH;
+  final double statBtnPadV;
+  final double statBtnFont;
+  final double cardPadH;
+  final double cardPadV;
+  final double cardIcon;
+  final double cardGap;
+  final double cardLabel;
+  final double cardAmount;
+
+  const _DashboardFit({
+    required this.compact,
+    required this.useGrid,
+    required this.gap,
+    required this.highlightPad,
+    required this.highlightGap,
+    required this.highlightIcon,
+    required this.highlightLabel,
+    required this.highlightAmount,
+    required this.dividerHeight,
+    required this.dividerMargin,
+    required this.statBtnPadH,
+    required this.statBtnPadV,
+    required this.statBtnFont,
+    required this.cardPadH,
+    required this.cardPadV,
+    required this.cardIcon,
+    required this.cardGap,
+    required this.cardLabel,
+    required this.cardAmount,
+  });
+
+  factory _DashboardFit.from(BoxConstraints constraints) {
+    final w = constraints.maxWidth;
+    final h = constraints.maxHeight;
+    final compact = h < 620;
+    // Tablet/desktop, or short landscape phones: 2×2 grid so cards use width instead of overflowing vertically.
+    final useGrid = w >= 640 || h < 500;
+    final t = (h / 720).clamp(0.72, 1.15);
+    return _DashboardFit(
+      compact: compact,
+      useGrid: useGrid,
+      gap: (compact ? 8.0 : 12.0) * t.clamp(0.85, 1.1),
+      highlightPad: compact ? 14.0 : 22.0,
+      highlightGap: compact ? 8.0 : 14.0,
+      highlightIcon: compact ? 28.0 : 36.0,
+      highlightLabel: compact ? 15.0 : 20.0,
+      highlightAmount: compact ? 20.0 : 24.0,
+      dividerHeight: compact ? 32.0 : 44.0,
+      dividerMargin: w < 400 ? 10.0 : (w < 700 ? 16.0 : 28.0),
+      statBtnPadH: compact ? 12.0 : 18.0,
+      statBtnPadV: compact ? 6.0 : 10.0,
+      statBtnFont: compact ? 11.0 : 13.0,
+      cardPadH: compact ? 12.0 : 18.0,
+      cardPadV: compact ? 8.0 : 14.0,
+      cardIcon: compact ? 36.0 : 46.0,
+      cardGap: compact ? 10.0 : 14.0,
+      cardLabel: compact ? 13.0 : 16.0,
+      cardAmount: compact ? 16.0 : 19.0,
     );
   }
 }
