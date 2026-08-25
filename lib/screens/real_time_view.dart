@@ -165,7 +165,7 @@ class _RealTimeViewState extends State<RealTimeView> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 13,
             color: Colors.white.withValues(alpha: 0.7),
             fontWeight: FontWeight.w800,
             letterSpacing: 0.6,
@@ -222,7 +222,7 @@ class _RealTimeViewState extends State<RealTimeView> {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: folded ? 14 : 16, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: folded ? 16 : 18, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Align(
@@ -314,7 +314,7 @@ class _StatisticsDialogState extends State<_StatisticsDialog> {
               softWrap: false,
               textAlign: TextAlign.end,
               style: TextStyle(
-                fontSize: compact ? 9 : 11,
+                fontSize: compact ? 10 : 12,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey[400],
               ),
@@ -329,7 +329,7 @@ class _StatisticsDialogState extends State<_StatisticsDialog> {
           month,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: compact ? 11 : 12, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: compact ? 12 : 13, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       );
 
