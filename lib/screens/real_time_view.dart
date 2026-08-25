@@ -462,7 +462,7 @@ class _StatisticsDialogState extends State<_StatisticsDialog> {
               softWrap: false,
               textAlign: TextAlign.end,
               style: TextStyle(
-                fontSize: compact ? 9 : 11,
+                fontSize: compact ? 10 : 12,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey[400],
               ),
@@ -477,7 +477,7 @@ class _StatisticsDialogState extends State<_StatisticsDialog> {
           month,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: compact ? 11 : 12, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: compact ? 12 : 13, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       );
 

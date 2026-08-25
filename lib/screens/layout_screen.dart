@@ -1049,7 +1049,7 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                     child: Text(
                       e.$2,
                       maxLines: 1,
-                      style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5, color: isActive ? primaryIndigo : Colors.grey),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5, color: isActive ? primaryIndigo : Colors.grey),
                     ),
                   ),
                 ],

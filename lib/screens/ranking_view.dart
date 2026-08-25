@@ -222,7 +222,7 @@ class _RankingViewState extends State<RankingView> {
     final width = MediaQuery.sizeOf(context).width;
     final isNarrow = width < 500;
     final titleStyle = TextStyle(
-      fontSize: isNarrow ? 16 : 20,
+      fontSize: isNarrow ? 17 : 21,
       fontWeight: FontWeight.w900,
       color: Colors.white,
       letterSpacing: -0.5,
@@ -355,7 +355,7 @@ class _RankingViewState extends State<RankingView> {
                   child: Text(
                     label,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                       color: selected ? Colors.white : Colors.white.withValues(alpha: 0.85),
                       letterSpacing: 0.3,
@@ -366,7 +366,7 @@ class _RankingViewState extends State<RankingView> {
               : Text(
                   label,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                     color: selected ? Colors.white : Colors.white.withValues(alpha: 0.85),
                     letterSpacing: 0.3,
@@ -431,10 +431,10 @@ class _RankingViewState extends State<RankingView> {
       builder: (context, constraints) {
         final isVerySmall = constraints.maxWidth < 350;
         final iconSize = isVerySmall ? 40.0 : 48.0;
-        final nameSize = isVerySmall ? 14.0 : 16.0;
-        final codeSize = isVerySmall ? 10.0 : 11.0;
-        final labelSize = isVerySmall ? 8.0 : 9.0;
-        final valueSize = isVerySmall ? 12.0 : 14.0;
+        final nameSize = isVerySmall ? 15.0 : 17.0;
+        final codeSize = isVerySmall ? 11.0 : 12.0;
+        final labelSize = isVerySmall ? 9.0 : 10.0;
+        final valueSize = isVerySmall ? 13.0 : 15.0;
         final spacing = isVerySmall ? 8.0 : 12.0;
         
         return Column(
@@ -663,7 +663,7 @@ class _RankingViewState extends State<RankingView> {
         ),
         Column(
           children: [
-            Text(l10n.winLoss, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
+            Text(l10n.winLoss, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
             const SizedBox(height: 4),
             Text(winLossText, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: winLossColor)),
           ],
@@ -671,7 +671,7 @@ class _RankingViewState extends State<RankingView> {
         const SizedBox(width: 24),
         Column(
           children: [
-            Text(l10n.rollingVolume, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
+            Text(l10n.rollingVolume, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
             const SizedBox(height: 4),
             Text('₱${_fmt.format(item.rolling)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
@@ -679,7 +679,7 @@ class _RankingViewState extends State<RankingView> {
         const SizedBox(width: 24),
         Column(
           children: [
-            Text(l10n.commission, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
+            Text(l10n.commission, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.grey[500], letterSpacing: 1)),
             const SizedBox(height: 4),
             Text('₱${_fmt.format(item.commission)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           ],

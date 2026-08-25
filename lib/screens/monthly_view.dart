@@ -112,7 +112,7 @@ class _MonthlyViewState extends State<MonthlyView> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
+                fontSize: 14,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: selected ? Colors.white : Colors.white.withValues(alpha: 0.75),
                 letterSpacing: 0.6,
@@ -137,7 +137,7 @@ class _MonthlyViewState extends State<MonthlyView> {
       child: Text(
         rank,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
           color: accentPurple,
           letterSpacing: 0.4,
@@ -156,10 +156,10 @@ class _MonthlyViewState extends State<MonthlyView> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 7,
-              fontWeight: FontWeight.w500,
-              color: Colors.white.withValues(alpha: 0.38),
-              letterSpacing: 1.1,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: accentPurple,
+              letterSpacing: 0.4,
             ),
           ),
           const SizedBox(height: 3),
@@ -169,7 +169,7 @@ class _MonthlyViewState extends State<MonthlyView> {
               value,
               maxLines: 1,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: valueColor,
                 height: 1.1,
@@ -247,7 +247,7 @@ class _MonthlyViewState extends State<MonthlyView> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                       letterSpacing: -0.2,
@@ -265,7 +265,7 @@ class _MonthlyViewState extends State<MonthlyView> {
                     child: Text(
                       code,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: accentPurple,
                         letterSpacing: 0.3,
@@ -377,10 +377,10 @@ class _MonthlyViewState extends State<MonthlyView> {
                   child: Text(
                     l10n.settledGameLabel.toUpperCase(),
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
-                      color: Colors.white.withValues(alpha: 0.4),
+                      color: emeraldAccent,
                     ),
                   ),
                 ),

@@ -134,11 +134,11 @@ class _MarkerViewState extends State<MarkerView> {
         children: [
           Icon(Icons.description, color: primaryIndigo, size: 20),
           const SizedBox(width: 8),
-          Text(l10n.realTimeMarker, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(l10n.realTimeMarker, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           const Spacer(),
           Text(l10n.totalMarker, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[400])),
           const SizedBox(width: 8),
-          Text(_fmt.format(total), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(_fmt.format(total), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
         ],
       ),
     );
@@ -309,7 +309,7 @@ class _CreditStyleCard extends StatelessWidget {
                           if (marker.lastUpdate.isNotEmpty)
                             Text(
                               marker.lastUpdate,
-                              style: TextStyle(fontSize: 9, color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w500),
+                              style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.9), fontWeight: FontWeight.w500),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -317,7 +317,7 @@ class _CreditStyleCard extends StatelessWidget {
                             if (marker.lastUpdate.isNotEmpty) const SizedBox(height: 2),
                             Text(
                               'Agent : ${marker.guest}',
-                              style: TextStyle(fontSize: 9, color: Colors.white.withValues(alpha: 0.6), fontWeight: FontWeight.w500),
+                              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6), fontWeight: FontWeight.w500),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -338,7 +338,7 @@ class _CreditStyleCard extends StatelessWidget {
                   Text(
                     marker.agent,
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       letterSpacing: 0.4,
@@ -355,7 +355,7 @@ class _CreditStyleCard extends StatelessWidget {
                         children: [
                           Text(
                             l10n.activeBalance,
-                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
                           ),
                           Text(
                             _fmt.format(marker.balance),
@@ -380,11 +380,11 @@ class _CreditStyleCard extends StatelessWidget {
                                 children: [
                                   Text(
                                     l10n.limit,
-                                    style: TextStyle(fontSize: 8, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5), letterSpacing: 1),
                                   ),
                                   Text(
                                     _fmt.format(marker.limit),
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.7)),
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.7)),
                                   ),
                                 ],
                               ),

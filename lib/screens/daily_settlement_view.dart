@@ -154,11 +154,10 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                     ),
                     const Divider(height: 1, color: Colors.white12),
                     Expanded(
-                      child: Padding(
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-                        child: Column(
-                          children: List.generate(6, (_) => _skeletonExpenseCategoryRow()),
-                        ),
+                        children: List.generate(6, (_) => _skeletonExpenseCategoryRow()),
                       ),
                     ),
                   ],
@@ -189,7 +188,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
 
     if (w >= 900) {
       final cardW = (w - gap * 4) / 5;
-      final h = tight && constraints.maxHeight < 500 ? 88.0 : 112.0;
+      final h = tight && constraints.maxHeight < 500 ? 78.0 : 140.0;
       return Row(
         children: [
           for (var i = 0; i < 5; i++) ...[
@@ -201,8 +200,11 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     }
 
     final cardW = (w - gap) / 2;
-    final cardH = tight ? 68.0 : 112.0;
-    final spanH = tight ? 50.0 : 72.0;
+    // A tall-but-narrow phone (height >=720, so not "tight") still only has ~half its
+    // width per card here — go by width too, or the roomy desktop sizing below overflows.
+    final compactCards = tight || w < 600;
+    final cardH = compactCards ? 78.0 : 140.0;
+    final spanH = compactCards ? 50.0 : 68.0;
     return Column(
       children: [
         Row(
@@ -295,9 +297,10 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: tall ? 12 : 11,
+                      fontSize: tall ? 18 : 15,
                       fontWeight: FontWeight.w600,
                       color: _breakdownInkPrimary,
+                      height: 1.0,
                     ),
                   ),
                   SizedBox(height: tall ? 6 : 3),
@@ -321,14 +324,15 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                 Text(
                   _fmt.format(amount),
                   style: TextStyle(
-                    fontSize: tall ? 13 : 12,
+                    fontSize: tall ? 18 : 15,
                     fontWeight: FontWeight.bold,
                     color: _breakdownInkPrimary,
+                    height: 1.0,
                   ),
                 ),
                 Text(
                   '(${_pct(percent)}%)',
-                  style: TextStyle(fontSize: tall ? 10 : 9, fontWeight: FontWeight.w700, color: _breakdownInkSecondary),
+                  style: TextStyle(fontSize: tall ? 12 : 11, fontWeight: FontWeight.w700, color: _breakdownInkSecondary, height: 1.15),
                 ),
               ],
             ),
@@ -340,14 +344,47 @@ class _DailySettlementViewState extends State<DailySettlementView> {
 
   Widget _categoryList(List<ExpenseCategoryBreakdown> categories) {
     if (categories.isEmpty) return const SizedBox.shrink();
-    return Column(
-      children: List.generate(categories.length, (i) {
-        final c = categories[i];
-        final color = _categoryColors[i % _categoryColors.length];
-        return Expanded(
-          child: _buildExpenseCategoryRow(c.name, c.amount, c.percent, color),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const minRowHeight = 33.0;
+        const maxRowHeight = 64.0;
+        const compactSeparator = 3.0;
+        const wideSeparator = 8.0;
+        // Fill leftover space on tall/desktop screens (up to a cap that still reads
+        // comfortably) instead of leaving a big gap under the last row; on short/mobile
+        // screens this settles back down to the tested minimum that avoids overflow.
+        final n = categories.length;
+        var rowHeight = minRowHeight;
+        var separator = compactSeparator;
+        if (constraints.maxHeight.isFinite && n > 0) {
+          final available = constraints.maxHeight;
+          // Try the tall-font regime first, using its own (wider) separator in the fit
+          // check — using the wrong separator here is what causes a forced scroll even
+          // though the content technically fits.
+          final fitWide = (available - (n - 1) * wideSeparator) / n;
+          if (fitWide >= 44) {
+            rowHeight = fitWide.clamp(44.0, maxRowHeight);
+            separator = wideSeparator;
+          } else {
+            final fitCompact = (available - (n - 1) * compactSeparator) / n;
+            rowHeight = fitCompact.clamp(minRowHeight, maxRowHeight);
+            separator = compactSeparator;
+          }
+        }
+        return ListView.separated(
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          itemCount: n,
+          separatorBuilder: (_, __) => SizedBox(height: separator),
+          itemBuilder: (context, i) {
+            final c = categories[i];
+            final color = _categoryColors[i % _categoryColors.length];
+            return SizedBox(
+              height: rowHeight,
+              child: _buildExpenseCategoryRow(c.name, c.amount, c.percent, color),
+            );
+          },
         );
-      }),
+      },
     );
   }
 
@@ -371,7 +408,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
       children: [
         Text(
           l10n.totalExpenses.toUpperCase(),
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: _breakdownInkMuted, letterSpacing: 0.6),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: _breakdownInkMuted, letterSpacing: 0.6),
         ),
         const SizedBox(height: 4),
         Text(_fmt.format(_expenseBreakdown.total), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _breakdownInkPrimary)),
@@ -379,14 +416,14 @@ class _DailySettlementViewState extends State<DailySettlementView> {
     );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           totalBlock,
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Divider(color: _breakdownTrack, height: 1),
-          const SizedBox(height: 6),
+          const SizedBox(height: 3),
           Expanded(child: _categoryList(categories)),
         ],
       ),
@@ -413,6 +450,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                 icon: Icons.home_work,
                 color: StatCardColor.brown,
                 centered: true,
+                leadingIcon: !wide,
               ),
               StatCard(
                 label: l10n.cashBalance,
@@ -420,6 +458,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                 icon: Icons.payments,
                 color: StatCardColor.emerald,
                 centered: true,
+                leadingIcon: !wide,
               ),
               StatCard(
                 label: l10n.guestBalance,
@@ -427,6 +466,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                 icon: Icons.people,
                 color: StatCardColor.purple,
                 centered: true,
+                leadingIcon: !wide,
               ),
               StatCard(
                 label: l10n.netJunketMoney,
@@ -434,6 +474,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                 icon: Icons.account_balance,
                 color: StatCardColor.amber,
                 centered: true,
+                leadingIcon: !wide,
               ),
               StatCard(
                 label: l10n.netJunketCash,
@@ -456,7 +497,7 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       child: Row(
                         children: [
                           Icon(Icons.donut_large, size: 16, color: primaryIndigo),
@@ -466,13 +507,13 @@ class _DailySettlementViewState extends State<DailySettlementView> {
                               l10n.expenseBreakdown,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(color: primaryIndigo.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-                            child: Text(l10n.thisMonth, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primaryIndigo)),
+                            child: Text(l10n.thisMonth, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: primaryIndigo)),
                           ),
                         ],
                       ),
