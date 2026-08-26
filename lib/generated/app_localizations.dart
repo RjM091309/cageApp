@@ -380,6 +380,12 @@ abstract class AppLocalizations {
   /// **'Cage Rolling'**
   String get cageRollingLabel;
 
+  /// No description provided for @houseRollingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'House Rolling'**
+  String get houseRollingLabel;
+
   /// No description provided for @casinoRollingLabel.
   ///
   /// In en, this message translates to:

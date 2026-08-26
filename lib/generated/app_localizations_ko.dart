@@ -154,6 +154,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cageRollingLabel => '케이지롤링';
 
   @override
+  String get houseRollingLabel => '하우스롤링';
+
+  @override
   String get casinoRollingLabel => '카지노롤링';
 
   @override

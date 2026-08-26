@@ -155,6 +155,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cageRollingLabel => 'Cage Rolling';
 
   @override
+  String get houseRollingLabel => 'House Rolling';
+
+  @override
   String get casinoRollingLabel => 'Casino Rolling';
 
   @override

@@ -272,7 +272,7 @@ class _RealTimeViewState extends State<RealTimeView> {
       _wideStatCard(icon: Icons.account_balance_wallet, color: amberAccent, label: l10n.totalCommissionLabel, value: _summary?.totalCommission, fit: fit),
       _wideStatCard(icon: Icons.shield, color: roseAccent, label: l10n.accumulatedExpenses, value: _summary?.expenses, fit: fit),
       _wideStatCard(icon: Icons.videogame_asset, color: primaryIndigo, label: l10n.cageRollingLabel, value: _summary?.cageRolling, fit: fit),
-      _wideStatCard(icon: Icons.casino, color: primaryIndigo, label: l10n.casinoRollingLabel, value: _summary?.casinoRolling, fit: fit),
+      _wideStatCard(icon: Icons.casino, color: primaryIndigo, label: l10n.houseRollingLabel, value: _summary?.houseRolling, fit: fit),
     ];
   }
 

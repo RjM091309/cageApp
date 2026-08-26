@@ -8,6 +8,7 @@ class DashboardSummary {
   final int additionalCommission;
   final int expenses;
   final int cageRolling;
+  final int houseRolling;
   final int casinoRolling;
 
   const DashboardSummary({
@@ -19,6 +20,7 @@ class DashboardSummary {
     required this.additionalCommission,
     required this.expenses,
     required this.cageRolling,
+    required this.houseRolling,
     required this.casinoRolling,
   });
 
@@ -44,7 +46,12 @@ class DashboardSummary {
       additionalCommission: _num(json, 'additional_commission'),
       expenses: _num(json, 'expenses'),
       cageRolling: _num(json, 'cage_rolling'),
-      casinoRolling: _num(json, 'casino_rolling'),
+      houseRolling: json.containsKey('house_rolling')
+          ? _num(json, 'house_rolling')
+          : _num(json, 'casino_rolling'),
+      casinoRolling: json.containsKey('house_rolling')
+          ? _num(json, 'house_rolling')
+          : _num(json, 'casino_rolling'),
     );
   }
 
@@ -59,6 +66,7 @@ class DashboardSummary {
           additionalCommission: 0,
           expenses: 0,
           cageRolling: 0,
+          houseRolling: 0,
           casinoRolling: 0,
         );
 }

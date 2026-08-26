@@ -287,7 +287,10 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
         child: SizedBox.expand(child: content),
       );
     }
-    if (view == ViewType.ranking || view == ViewType.marker || view == ViewType.daily) {
+    if (view == ViewType.ranking ||
+        view == ViewType.marker ||
+        view == ViewType.daily ||
+        view == ViewType.monthly) {
       return Padding(
         padding: padding,
         child: wrapped,
@@ -363,7 +366,8 @@ class _LayoutScreenState extends State<LayoutScreen> with TickerProviderStateMix
                             ? _buildPortraitPageView(context)
                             : (_activeView == ViewType.ranking ||
                                     _activeView == ViewType.marker ||
-                                    _activeView == ViewType.daily)
+                                    _activeView == ViewType.daily ||
+                                    _activeView == ViewType.monthly)
                                 ? Padding(
                                     padding: EdgeInsets.all(FoldLayout.pagePadding(context)),
                                     child: Center(

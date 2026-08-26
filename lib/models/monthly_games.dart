@@ -28,7 +28,8 @@ class OngoingGameRow {
   }
 }
 
-/// Aggregate totals for all Settled games on one day (settled_today / settled_previous).
+/// Aggregate totals for all Settled games on one day (settled_today / settled_previous),
+/// plus the individual settled games that make up those totals.
 class SettledGameTotals {
   final String date;
   final int gameCount;
@@ -36,6 +37,7 @@ class SettledGameTotals {
   final int cashOut;
   final int commission;
   final int winLoss;
+  final List<OngoingGameRow> games;
 
   const SettledGameTotals({
     required this.date,
@@ -44,9 +46,11 @@ class SettledGameTotals {
     required this.cashOut,
     required this.commission,
     required this.winLoss,
+    this.games = const [],
   });
 
   factory SettledGameTotals.fromJson(Map<String, dynamic> json) {
+    final rawGames = json['games'] as List<dynamic>? ?? [];
     return SettledGameTotals(
       date: (json['date'] ?? '').toString(),
       gameCount: MonthlyGames.numFromJson(json, 'game_count'),
@@ -54,6 +58,7 @@ class SettledGameTotals {
       cashOut: MonthlyGames.numFromJson(json, 'cash_out'),
       commission: MonthlyGames.numFromJson(json, 'commission'),
       winLoss: MonthlyGames.numFromJson(json, 'win_loss'),
+      games: rawGames.map((e) => OngoingGameRow.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 

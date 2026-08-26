@@ -47,6 +47,7 @@
   "additionalCommissionLabel": "어디셔널 커미션",
   "expensesLabel": "지출",
   "cageRollingLabel": "케이지롤링",
+  "houseRollingLabel": "하우스롤링",
   "casinoRollingLabel": "카지노롤링",
   "shareLabel": "셰어",
   "noDataYet": "데이터 없음",

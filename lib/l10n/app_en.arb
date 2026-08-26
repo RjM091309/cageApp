@@ -61,6 +61,7 @@
   "additionalCommissionLabel": "Additional Commission",
   "expensesLabel": "Expenses",
   "cageRollingLabel": "Cage Rolling",
+  "houseRollingLabel": "House Rolling",
   "casinoRollingLabel": "Casino Rolling",
   "shareLabel": "Share",
   "noDataYet": "No data yet",
