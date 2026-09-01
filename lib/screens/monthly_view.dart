@@ -692,17 +692,6 @@ class _MonthlyViewState extends State<MonthlyView> {
     );
   }
 
-  // Plain, unbounded column — no nested scrollable here. A ListView with a fixed max
-  // height inside the page's outer SingleChildScrollView fights it for drag gestures
-  // (scrolling the inner list could instead scroll the whole page, moving cards above
-  // it). Letting every card be part of the single outer scroll avoids that entirely.
-  Widget _scrollList({required List<Widget> children}) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
-      child: Column(children: children),
-    );
-  }
-
   /// The "SETTLED GAME" title + Today/Yesterday toggle + total-breakdown summary card.
   /// Pinned at the top of the scroll view (see build()) so it stays visible while the
   /// per-game rows below it scroll underneath.
@@ -840,16 +829,9 @@ class _MonthlyViewState extends State<MonthlyView> {
                 child: (!_loading &&
                         _settledExpanded &&
                         settled.games.isNotEmpty)
-                    ? _scrollList(
-                        children: [
-                          for (var i = 0; i < settled.games.length; i++)
-                            _gameCard(
-                              rank: _rankOf(i + 1),
-                              title: _splitAccount(settled.games[i].account).$1,
-                              code: _splitAccount(settled.games[i].account).$2,
-                              row: settled.games[i],
-                            ),
-                        ],
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        child: _ongoingTable(settled.games),
                       )
                     : const SizedBox.shrink(),
               ),
