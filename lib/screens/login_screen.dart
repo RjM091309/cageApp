@@ -219,7 +219,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: IconButton(
                                 tooltip: AppLocalizations.of(context).language,
                                 onPressed: () => setState(() => _languageOpen = true),
-                                icon: const Icon(Icons.language, color: Colors.grey, size: 28),
+                                icon: Text(
+                                  AppLocaleScope.of(context).locale?.languageCode == 'en' ? '🇺🇸' : '🇰🇷',
+                                  style: const TextStyle(fontSize: 24),
+                                ),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                               ),
@@ -503,7 +506,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: Row(
             children: [
-              Icon(Icons.check, size: 20, color: isSelected ? primaryIndigo : Colors.grey),
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: isSelected ? Icon(Icons.check, size: 20, color: primaryIndigo) : null,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isSelected ? primaryIndigo : Colors.white)),
