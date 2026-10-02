@@ -480,6 +480,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             setState(() => _languageOpen = false);
                           },
                         ),
+                        const SizedBox(height: 12),
+                        _languageOption(
+                          context,
+                          flag: '🇯🇵',
+                          label: l10n.japanese,
+                          isSelected: current == 'ja',
+                          onTap: () {
+                            scope.setLocale(const Locale('ja'));
+                            setState(() => _languageOpen = false);
+                          },
+                        ),
                       ],
                     );
                   },

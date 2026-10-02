@@ -121,6 +121,7 @@
   "language": "언어",
   "english": "English",
   "korean": "한국어",
+  "japanese": "日本語",
   "signIn": "로그인",
   "loginSubtitle": "연결 상태를 유지하기 위해 로그인하세요.",
   "username": "사용자 이름",
