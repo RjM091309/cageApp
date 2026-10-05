@@ -24,8 +24,9 @@ class Handler(SimpleHTTPRequestHandler):
     }
 
     def end_headers(self):
-        if self.path.split("?", 1)[0] in ("/", "/index.html", "/flutter_service_worker.js"):
-            self.send_header("Cache-Control", "no-cache")
+        # Flutter web filenames aren't content-hashed, so always revalidate
+        # (unchanged files still come back as a cheap 304 via Last-Modified).
+        self.send_header("Cache-Control", "no-cache")
         super().end_headers()
 
     def do_GET(self):

@@ -20,3 +20,5 @@ flutter pub get
 
 echo "Building Flutter web (release)..."
 flutter build web --release
+
+scripts/cache-bust-web.sh

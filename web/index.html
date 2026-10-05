@@ -22,6 +22,33 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Older builds installed a caching service worker that keeps serving the
+    // old app. Remove it and its caches before loading the app.
+    (async function () {
+      let stale = false;
+      try {
+        if ('serviceWorker' in navigator) {
+          for (const r of await navigator.serviceWorker.getRegistrations()) {
+            await r.unregister();
+          }
+        }
+        if (window.caches) {
+          for (const k of await caches.keys()) {
+            stale = true;
+            await caches.delete(k);
+          }
+        }
+      } catch (e) {}
+      if (stale) {
+        location.reload();
+        return;
+      }
+      const s = document.createElement('script');
+      s.src="flutter_bootstrap.js";
+      s.async = true;
+      document.body.appendChild(s);
+    })();
+  </script>
 </body>
 </html>
